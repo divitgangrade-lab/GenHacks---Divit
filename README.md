@@ -4,7 +4,7 @@
 
 Since 27 September 2026, Directive (EU) 2024/825 has blacklisted generic green claims across the EU. "Eco-friendly", "climate neutral", "biodegradable" and the word "green" itself are banned unless the seller can show recognised excellent environmental performance. The rules apply to stock already on shelves, not just new products.
 
-Yet most shop pages still carry them. Claim Check reads the page, finds those claims, and names the rule each one breaks and the evidence that would make it legal.
+Yet many shop pages still carry them. Claim Check reads the page, finds those claims, and names the rule each one breaks and the evidence that would make it legal.
 
 ## Why this, and not another carbon calculator
 
@@ -95,6 +95,8 @@ The method, so the number can be argued with:
 A saved page and a live page are read by the same definition of visible text, in `src/text.js`: one skip definition (`data-scan-skip`, the panel's own output, `hidden`, and non-prose elements such as `script`, `style`, `svg` and `template`) behind two adapters, `domText` for a live DOM and `bytesText` for a saved file, which share the same contract. The browser walks the text nodes of the page; the corpus has only bytes, so it drops marked regions by tag depth, ignores `<head>` and its `<title>`, strips the remaining tags, decodes entities and collapses whitespace. Both then call the same `scan()`, so the same page gives the same findings either way. The counting rules — a page counts once, a rule counts a page once however often it is mentioned, saves under 30 words are skipped rather than counted clean — live in `src/corpus.js` and are tested.
 
 The number therefore cannot see copy rendered by JavaScript after load, words inside attributes such as `alt` and `title`, text baked into images and badges, pages behind a consent wall, or any language other than English. It is a lower bound on a hand-picked sample, not a survey of EU e-commerce.
+
+The first dated run is in [corpus/report.md](corpus/report.md): 13 pages saved on 21 November 2026 at commit `c015683`, of which 10 were shop product pages and 3 were EU Ecolabel product pages kept as a false-positive control. No shop page carried a banned claim; all three certified pages carried the generic word "biodegradable". All three findings were reviewed in context and judged true positives, so the reviewed false-positive count was 0 of 3. The report states what that small, brand-skewed sample can and cannot support.
 
 ## Where the phrases come from
 
