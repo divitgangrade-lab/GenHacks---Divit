@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discharge Rx — a discharge letter you can actually follow</title>
+  <meta name="description" content="Turns a hospital discharge letter into a plain-language plan, then checks that no instruction was lost before showing it.">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the tool</a>
+
+  <header class="masthead">
+    <p class="kicker">GenHacks 2026 · Healthcare &amp; Environmental</p>
+    <h1>Discharge Rx</h1>
+    <p class="lede">A discharge letter becomes a plan you can follow, and every instruction in the original is checked before the plan is allowed out.</p>
+  </header>
+
+  <main id="main" class="layout">
+    <section class="panel panel--input" aria-labelledby="letter-heading">
+      <div class="panel__head">
+        <h2 id="letter-heading">The letter</h2>
+        <div class="samples" id="samples" role="group" aria-label="Sample letters"></div>
+      </div>
+
+      <label class="field__label" for="letter">Paste a discharge letter or medication list</label>
+      <textarea id="letter" class="letter" spellcheck="false" autocomplete="off" rows="16"></textarea>
+
+      <p class="notice" id="notice" hidden role="status"></p>
+
+      <div class="actions">
+        <button type="button" class="btn btn--primary" id="simplify">Make it plain</button>
+        <button type="button" class="btn" id="stress">Test the checker</button>
+        <button type="button" class="btn btn--quiet" id="clear">Clear</button>
+      </div>
+      <p class="hint">Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run. Nothing leaves this page: every step runs in your browser.</p>
+    </section>
+
+    <section class="panel panel--result" id="result" hidden aria-labelledby="result-heading">
+      <h2 id="result-heading" class="sr-only">Result</h2>
+
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+
+      <div class="score" id="score"></div>
+
+      <div class="plan" id="plan"></div>
+
+      <div class="schedule" id="schedule" hidden>
+        <h3 class="block__title">One day at a glance</h3>
+        <ul class="schedule__list" id="schedule-list"></ul>
+      </div>
+
+      <div class="actions actions--result" id="actions" hidden>
+        <button type="button" class="btn" id="ics">Download calendar</button>
+        <button type="button" class="btn" id="copy">Copy the plan</button>
+        <button type="button" class="btn btn--quiet" id="print">Print</button>
+      </div>
+
+      <div class="stress" id="stress-out" hidden aria-live="polite"></div>
+    </section>
+  </main>
+
+  <section class="method" aria-labelledby="method-heading">
+    <h2 id="method-heading">What happens to your letter</h2>
+    <ol class="method__list">
+      <li><strong>Read.</strong> A rules-based parser pulls out medicines, doses, appointments and warnings. No model decides what your letter said.</li>
+      <li><strong>Rewrite.</strong> Each instruction is rendered in short sentences, with clinical shorthand swapped for everyday words.</li>
+      <li><strong>Check.</strong> Every dose, date, drug name and clinical warning in the original must appear in the rewrite. If one is missing, the plan is blocked.</li>
+      <li><strong>Carry through.</strong> Anything the parser does not recognise is kept in the original words rather than guessed at.</li>
+    </ol>
+    <p class="method__note">Why it matters: 81% of 1,511 discharge documents sit above the sixth-grade reading level doctors are told to aim for, and 100% do on SMOG. Comprehension errors go on to predict adherence errors. Lowering the reading level cut post-discharge phone calls from 21.9% to 9.0% and readmissions from 1.9% to 0.9% per 100 patients in one study.</p>
+  </section>
+
+  <footer class="site-foot">
+    <p>Sample letters are synthetic. No patient data. This is a demonstration, not medical advice: always follow the instructions your own care team gave you.</p>
+    <p class="site-foot__links">
+      <a href="https://www.amjmed.com/article/S0002-9343(25)00196-2/fulltext">Readability of discharge instructions (2025)</a>
+      <a href="https://www.jpeds.com/article/S0022-3476(19)30535-9/abstract">Comprehension and adherence errors (2019)</a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0039606018307268">Readability and readmissions (2019)</a>
+      <a href="https://academic.oup.com/intqhc/article/38/4/mzag133/8792929">AI discharge letters (2026)</a>
+    </p>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+  <noscript><p class="noscript">This tool needs JavaScript. Everything runs locally in your browser.</p></noscript>
+</body>
+</html>
