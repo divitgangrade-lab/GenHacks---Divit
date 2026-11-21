@@ -18,10 +18,10 @@ Yet most shop pages still carry them. Claim Check reads the page, finds those cl
 ```
 src/rules.js   the rule set: pattern, plain-English reading, citation, evidence
 src/scan.js    pure functions: text in, findings out (no DOM, no network)
-src/scan.js    pure functions: text in, findings out (no DOM, no network)
 report.js      bookmarklet entry: reads the page, renders the panel in a shadow root
 app.js         the demo page, and its own renderer
 tests/run.mjs  21 assertions against the scanner
+scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
 The split matters: the decision layer is pure and testable, and the two renderers (inline in the demo, floating panel on a live page) share it.
@@ -33,6 +33,7 @@ No build step, no install, no key.
 ```bash
 npm test          # 21 assertions
 npm run serve     # http://localhost:3000
+npm run corpus    # hit rate over saved pages, see below
 ```
 
 Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt.
@@ -45,6 +46,28 @@ Drag **Check this page** from the demo onto your bookmarks bar, then click it on
 - **It is not legal advice**, and it does not know whether a national authority has started enforcing.
 
 These are limits of a text check, not bugs to fix later.
+
+## Measuring it against real pages
+
+A single demo page proves the scanner works. It does not say how common the claims are, and "most shop pages still carry them" is a claim of its own, so it gets measured rather than asserted. `scripts/corpus.mjs` runs the same rule set over a folder of pages somebody saved and prints the count.
+
+```bash
+mkdir -p corpus
+# hand-save product pages into corpus/, one file each
+npm run corpus              # or: npm run corpus -- corpus --json
+```
+
+The method, so the number can be argued with:
+
+1. **Fix the sample before looking at results.** Write down the list of pages first — for example the first product page of each of 30 EU-facing shops in one category — and save exactly those. Dropping a page after seeing what it says is how a hit rate becomes fiction.
+2. **Save the pages by hand**, browser menu → *Save page as* → *Web page, HTML only*, into `corpus/`, one file per page, named `NNN-shop-product.html`. No crawling, no scraping, no scripts fetching anything: the pages are read from disk.
+3. **Count pages, not findings.** A page counts once if it carries at least one banned claim, however many it has. The per-rule table counts a page once per rule, so it sums to more than the page total.
+4. **Skip the unreadable.** A save that lands on a cookie wall or fails halfway is dropped by a length floor (fewer than 30 words), and reported as skipped rather than as clean, because counting those as clean would flatter the result.
+5. **Report the sample with the number**: how many pages, from where, saved on what date, and the commit the scanner ran at — the script prints the commit itself.
+
+How a saved page becomes text, and where that differs from the bookmarklet: the browser version walks the live DOM and skips marked regions. The corpus version only has bytes, so it drops comments, `script`, `style`, `noscript`, `template`, `svg` and `iframe` blocks, strips the remaining tags, decodes entities and collapses whitespace. Everything after that — every pattern, guard, citation and severity — is the identical code path.
+
+What the number therefore cannot see: copy rendered by JavaScript after load (missing from a saved page), words inside attributes such as `alt` and `title`, text inside images and badges, pages behind a consent wall, and any language other than English. It is a lower bound on a hand-picked sample, not a survey of EU e-commerce.
 
 ## Where the phrases come from
 
@@ -59,7 +82,7 @@ Wording the directive does **not** blacklist stays out: `sustainable`, `consciou
 ## Next
 
 - A rule editor so a lawyer can add a phrase without touching code.
-- Flag a page's claim density across a whole category, to show which brands lean on wording instead of evidence.
+- A published corpus run: 100–200 saved pages, dated, with the per-rule table, so the hit rate is a number a judge can check instead of a slogan.
 
 Sources: [Directive (EU) 2024/825](https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng) and the [Commission's Q&A](https://commission.europa.eu/document/download/3c257883-bb2a-4dd9-a6dc-501d587bb34f_en).
 

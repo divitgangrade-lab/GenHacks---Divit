@@ -6,6 +6,7 @@
   "description": "Marks banned environmental claims on the page you are shopping on.",
   "scripts": {
     "test": "node tests/run.mjs",
+    "corpus": "node scripts/corpus.mjs",
     "serve": "python3 -m http.server 3000 --bind 0.0.0.0",
     "rb": "node scripts/rb-fetch.mjs",
     "build:showroom": "vite build"
