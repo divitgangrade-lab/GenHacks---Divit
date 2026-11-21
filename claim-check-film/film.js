@@ -741,6 +741,46 @@ S.end = (u) => {
   }
 };
 
+
+/* ───────────────────────── thumbnail (1280×720 delivery) ───────────────────────── */
+// Drawn in the film's 1920×1080 space, rendered at 2560×1440 and halved, so the
+// type is crisp at YouTube's size and still reads at 320 px wide.
+export function renderThumb() {
+  const dpr = cv.width / W;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.letterSpacing = '0px'; ctx.globalAlpha = 1; ctx.setLineDash([]);
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(paper, 0, 0, W, H);
+
+  halftoneSoft(1100, 30, 840, 1020, 24, 22,
+    (px, py) => clamp(1 - Math.hypot(px - 1560, py - 480) / 600), RED, 0.30, { core: 0.26, edge: 1.02 });
+
+  label('CASE 2024/825', 84, 118, { color: INK, size: 22 });
+  label('DIRECTIVE (EU) 2024/825 · ENFORCED 27 SEP 2026', 84, 148, { size: 18 });
+
+  txt('CLAIM', 78, 412, { size: 208 });
+  txt('CHECK', 78, 592, { size: 208 });
+
+  ctx.strokeStyle = RED; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.moveTo(84, 640); ctx.lineTo(84 + 560, 640); ctx.stroke();
+  label('THE SENTENCE · THE RULE · THE ARTICLE', 84, 690, { size: 22, track: 3 });
+
+  // the claim, marked, with its citation
+  card(84, 762, 940, 124, { fill: 'rgba(255,252,242,0.94)' });
+  txt('Biodegradable formula.', 122, 840, { size: 46, weight: 600, family: 'Inter' });
+  font(46, 600, 'Inter');
+  const bw = ctx.measureText('Biodegradable').width;
+  ctx.strokeStyle = RED; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(122, 856); ctx.lineTo(122 + bw, 854); ctx.stroke();
+  label('ANNEX I, POINT 4a · BANNED UNLESS PROVEN', 84, 940, { size: 20, color: RED });
+  label('13 PAGES CHECKED · 3 WITH A BANNED CLAIM', 84, 986, { size: 20 });
+
+  stamp('BANNED', 1440, 404, { p: 1, size: 150, rot: -0.075 });
+
+  grain(0.4);
+}
+
 /* ───────────────────────── frame ───────────────────────── */
 const ORDER = ['hook', 'title', 'law', 'three', 'product', 'anatomy', 'rules', 'decoy', 'install', 'privacy', 'receipts', 'limits', 'end'];
 

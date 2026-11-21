@@ -1,0 +1,30 @@
+You are shopping. The page says "biodegradable", "climate neutral", "eco-friendly". Since 27 September 2026, Directive (EU) 2024/825 bans those claims unless the seller can prove them.
+
+Claim Check is a bookmark. Drag it to the bookmarks bar, click it on any product page, and a panel opens on the page with every claim it finds: the sentence quoted, the phrase marked, the rule and the article that apply, and the evidence that would make the claim lawful.
+
+Try it: https://divitgangrade-lab.github.io/GenHacks---Divit/
+Source: https://github.com/divitgangrade-lab/GenHacks---Divit
+
+Nothing is uploaded. The page text never leaves the browser, which is what makes it safe to run on a checkout page.
+
+The shop page in this film is synthetic — written for the demo, and labelled as such on screen. The field run shown is 13 saved pages, checked on 21 November 2026: 3 with a banned claim, 0 false positives across 3 reviewed. It is a pilot, not a survey: small, brand-skewed, six pages from outside the EU. English pages, EU law only; it reads wording, never product facts, and it sees no images. Not legal advice.
+
+Chapters
+00:00 The claim
+00:10 The title
+00:17 The law and its date
+00:31 Three ways to say nothing
+00:43 The page, read in the browser
+00:53 Anatomy of one finding
+01:03 Six rules
+01:10 The decoy
+01:18 Install
+01:24 What leaves the page
+01:32 The dated run
+01:41 What it will not do
+01:48 A check, not a rewrite
+
+Credits
+Narration: Kokoro-82M, voice bm_fable, run locally. Score, foley and mix generated in code. Direction, type and every frame drawn in code, in the Halftone Dossier style. Built for GenHacks 2026 (Healthcare & Environmental).
+
+#GenHacks2026 #ConsumerProtection #GreenClaims
