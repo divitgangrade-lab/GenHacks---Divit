@@ -14,19 +14,32 @@ const swatch = color => `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="${color}"/></svg>`
 )}`
 
+// A stable array. LogoLoop's refresh effect depends on the logos prop, so a new
+// array on every render re-runs it, which sets layout state and renders again:
+// React stops at "maximum update depth exceeded" (error 185) and the tile dies.
+const LOGO_ITEMS = ['Claim', 'Check', 'Offsets'].map(word => ({
+  node: <span className="demo demo--chip demo--chip-sm">{word}</span>,
+  title: word
+}))
+
 class Boundary extends Component {
   constructor (props) {
     super(props)
     this.state = { failed: false }
   }
 
-  static getDerivedStateFromError () {
-    return { failed: true }
+  static getDerivedStateFromError (error) {
+    return { failed: true, message: String((error && error.message) || error) }
+  }
+
+  // A missing tile is a bug worth seeing in the console, not just a label.
+  componentDidCatch (error) {
+    console.error(`${this.props.name} failed to mount`, error)
   }
 
   render () {
     if (this.state.failed) {
-      return <p className="tile__fail">{this.props.name} could not mount here</p>
+      return <p className="tile__fail">{this.props.name} could not mount here: {this.state.message}</p>
     }
     return this.props.children
   }
@@ -110,7 +123,10 @@ const SURFACE_TILES = [
   { name: 'GlareHover', node: <RB.GlareHover height="120px" width="180px"><div className="demo demo--box">Glare</div></RB.GlareHover> },
   { name: 'GradualBlur', node: <div className="demo demo--blur">Blurred edge</div> },
   { name: 'ImageTrail', node: <RB.ImageTrail items={[swatch('#7df9ff'), swatch('#f4a261'), swatch('#e76f51')]} /> },
-  { name: 'LogoLoop', node: <RB.LogoLoop logos={['Claim', 'Check', 'Banned', 'Offsets'].map(word => ({ node: <span className="demo demo--chip">{word}</span>, title: word }))} /> },
+  // Vertical: the horizontal geometry recomputes its copy count until React
+  // aborts with "maximum update depth exceeded" in a tile this narrow. The
+  // vertical path measures its parent and settles. See the tile count test.
+  { name: 'LogoLoop', node: <RB.LogoLoop logos={LOGO_ITEMS} direction="down" hoverSpeed={0} /> },
   { name: 'Magnet', node: <RB.Magnet><span className="demo demo--chip">Magnet</span></RB.Magnet> },
   { name: 'MorphSlider', node: <RB.MorphSlider /> },
   { name: 'MicroSlats', node: <RB.MicroSlats /> },

@@ -149,3 +149,7 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .tile__stage { filter: none; }
 }
+
+/* LogoLoop measures its own content; chips narrow enough to fit one tile keep
+   the copy count from growing on every pass. */
+.demo--chip-sm { padding: .3rem .6rem; font-size: .7rem; }
