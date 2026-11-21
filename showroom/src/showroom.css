@@ -66,9 +66,7 @@ h1 {
   justify-content: center;
 }
 
-.tile--tall { grid-row: span 2; min-height: 360px; }
-
-.tile--canvas { min-height: 220px; }
+.grid--canvas .tile { grid-row: span 2; min-height: 360px; }
 
 .tile__stage {
   position: absolute; inset: 0;
@@ -77,6 +75,9 @@ h1 {
 }
 
 .tile__stage > * { max-width: 100%; }
+
+/* TrueFocus has no size prop; its 3rem words are wider than a phone tile. */
+.tile .focus-word { font-size: 2rem; }
 
 /* LogoLoop's horizontal track is max-content. As a grid item its min-content
    size would otherwise widen the stage's auto column with every copy, and the
@@ -155,12 +156,9 @@ h1 {
 
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }
-  .tile--tall { grid-row: span 1; min-height: 260px; }
+  .grid--canvas .tile { grid-row: span 1; min-height: 260px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tile__stage { filter: none; }
-}
 
 /* LogoLoop measures its own content; chips narrow enough to fit one tile keep
    the copy count from growing on every pass. */

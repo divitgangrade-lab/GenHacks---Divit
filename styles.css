@@ -141,14 +141,15 @@ a:hover { color: var(--ink); }
 .findings li { padding: .85rem 0; border-top: 1px solid var(--rule); }
 .findings li:first-child { border-top: 0; padding-top: 0; }
 
-.findings__head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
-
-.findings__span {
-  font-family: var(--mono); font-size: .875rem;
-  background: var(--wash); padding: .1rem .35rem; border-radius: 2px;
+.findings__sentence { font-size: .9375rem; margin-bottom: .45rem; }
+.findings__sentence mark {
+  background: var(--wash); color: inherit; font-weight: 600;
+  padding: 0 .15em; border-radius: 2px;
 }
 
-.findings__rule { margin-top: .35rem; font-size: .9375rem; }
+.findings__head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+
+.findings__rule { font-size: .9375rem; color: var(--ink-soft); }
 
 .findings__cite { font-size: .875rem; color: var(--muted); }
 

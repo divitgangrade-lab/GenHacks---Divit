@@ -2,7 +2,7 @@
 // leaves a panel behind. The scanner and the rules stay pure; page text comes
 // from src/text.js, and this is the only module that writes to the DOM.
 
-import { scan, summarise, verdictLine } from './src/scan.js'
+import { scan, sentenceParts, summarise, verdictLine } from './src/scan.js'
 import { TAG_LABEL, ruleById, SOURCES } from './src/rules.js'
 import { escapeHtml } from './src/escape.js'
 import { domText } from './src/text.js'
@@ -33,7 +33,8 @@ const STYLES = `
   ul { list-style: none; margin: 0; padding: 0; }
   li { padding: 10px 0; border-top: 1px solid #ded6c5; }
   li:first-child { border-top: 0; }
-  .span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: #f1ece0; padding: 1px 4px; }
+  .sentence { margin: 0 0 6px; font-size: 13px; color: #4a453c; }
+  .sentence mark { background: #f1ece0; color: #191713; padding: 1px 2px; font-weight: 600; }
   .tag { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 2px; }
   .tag.banned { background: #f8ece8; color: #8a2f21; }
   .tag.needs-evidence { background: #f4efe2; color: #7c5310; }
@@ -49,9 +50,10 @@ function renderPanel (doc, hits) {
 
   const items = hits.map(hit => {
     const rule = ruleById(hit.ruleId)
+    const { before, match, after } = sentenceParts(hit)
     return `
       <li>
-        <span class="span">${escapeHtml(hit.span)}</span>
+        <p class="sentence">${escapeHtml(before)}<mark>${escapeHtml(match)}</mark>${escapeHtml(after)}</p>
         <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span>
         <p class="rule">${escapeHtml(rule.says)}</p>
         <p class="cite">${escapeHtml(rule.citation)}</p>
@@ -91,4 +93,4 @@ function renderPanel (doc, hits) {
 // cache, before the marker existed: the id was there from the first version.
 document.getElementById(HOST_ID)?.remove()
 const subject = document.querySelector('[data-scan-root], #fixture') ?? document.body
-renderPanel(document, scan(domText(document).text(subject)))
+renderPanel(document, scan(domText(document).text(subject, { blocks: true })))

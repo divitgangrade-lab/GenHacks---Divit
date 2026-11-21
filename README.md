@@ -25,7 +25,7 @@ report.js      bookmarklet entry: reads the page, renders the panel in a shadow 
 app.js         the demo page, and its own renderer
 showroom/      the 50-component React Bits showroom (Vite + React, its own deps)
 motion/        the showroom's built output, committed for GitHub Pages
-tests/run.mjs  49 assertions against the scanner, page text and the corpus script
+tests/run.mjs  55 assertions against the scanner, page text, the recitals and the corpus script
 scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
@@ -56,7 +56,7 @@ The motion showroom is the exception. It is a Vite + React app in `showroom/` wi
 ```bash
 npm install              # once, for the showroom only
 npm run build:showroom   # writes motion/
-npm test          # 49 assertions, no dependencies needed
+npm test          # 55 assertions, no dependencies needed
 npm run serve            # http://localhost:3000
 npm run corpus           # hit rate over saved pages, see below
 ```
@@ -64,6 +64,14 @@ npm run corpus           # hit rate over saved pages, see below
 `package-lock.json` is committed, so `npm ci` reproduces the same dependency tree. The built `motion/` output is committed as well: after editing the showroom, rebuild it, or Pages keeps serving the old bundle.
 
 Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt. If a shop's Content-Security-Policy blocks that module, the bookmarklet leaves a small notice linking back to the demo instead of doing nothing. A policy that blocks `javascript:` URLs outright stops any bookmarklet before it can speak, which no page can work around.
+
+## Test it in five steps
+
+1. **Open the demo.** Go to https://divitgangrade-lab.github.io/GenHacks---Divit/ and look at *What the checker finds*. Expect **4 banned claims and 2 needing evidence**, and a sentence under each finding with one marked phrase.
+2. **Install the bookmarklet.** Drag **Check this page** from the demo onto your bookmarks bar. No account or extension is needed.
+3. **Run it on a real product page.** Open a page that carries a blacklisted phrase — the Ecover page in [`corpus/report.md`](corpus/report.md) is the one from the 21 November run; confirm the wording is still live, or pick another page that carries one. Click the bookmark. Expect a panel with the surrounding sentence, the phrase marked, the rule title and its citation. On the Ecover page the finding is *Biodegradable formula.*, rule *Generic environmental claim*, citation *Annex I, point 4a*. That page is UK, outside the directive; use an EU-facing page if you want the jurisdiction to match, or read it as a test of the wording.
+4. **Check the negative case.** Open a product page with no blacklisted wording, or look at the demo line *Pairs well with green tea and green beans*. Expect no finding for the ordinary words, while *go green* on the same card is flagged. This is the difference between a rule and a keyword grep.
+5. **Check the receipts.** Run `npm test`: **55 passed, 0 failed**, including the test that parses Recital 9 and 12 from the vendored directive text. Read [`corpus/report.md`](corpus/report.md) for the dated 13-page run: 3 pages flagged (23.1%), 0 of 3 reviewed findings false positive, with the sample's limits stated.
 
 ## What it will not do
 
@@ -100,7 +108,7 @@ The first dated run is in [corpus/report.md](corpus/report.md): 13 pages saved o
 
 ## Where the phrases come from
 
-Annex I, point 4a says only that a generic environmental claim is banned without recognised excellent environmental performance. The example phrases are in Recital 9, and the Commission's Q&A quotes that recital verbatim. Every term in `src/rules.js` is one of three things, and the rule says which:
+Annex I, point 4a says only that a generic environmental claim is banned without recognised excellent environmental performance. The example phrases are in Recital 9, and the Commission's Q&A quotes that recital verbatim. The recital sentences themselves are vendored in `src/recitals.js`; the test parses the quoted examples out of that text, so a rule cannot claim a phrase the directive does not contain, and a phrase added to the recital fails until a rule covers it. Every term in `src/rules.js` is one of three things, and the rule says which:
 
 - **Named in Recital 9:** environmentally friendly, eco-friendly, green, nature's friend, ecological, environmentally correct, climate friendly, gentle on the environment, carbon friendly, energy efficient, biodegradable, biobased.
 - **Named in Recital 12 for offsetting:** climate neutral, CO2 neutral certified, carbon positive, climate net zero, climate compensated, reduced climate impact, limited CO2 footprint.

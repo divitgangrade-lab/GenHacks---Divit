@@ -74,19 +74,42 @@ function decodeEntities (text) {
 // Node test run, where there is no browser global to lean on.
 const SHOW_TEXT = 4
 
-function readableText (doc, root) {
+const BLOCK_TAGS = new Set([
+  'address', 'article', 'aside', 'blockquote', 'dd', 'div', 'dl', 'dt',
+  'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
+  'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre',
+  'section', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul'
+])
+
+function nearestBlock (element, root) {
+  for (let node = element; node; node = node.parentElement) {
+    if (node === root) return root
+    if (BLOCK_TAGS.has(node.tagName?.toLowerCase())) return node
+  }
+  return root
+}
+
+function readableText (doc, root, blocks = false) {
   // Not dead code: a bookmarklet injected before a body exists would otherwise
   // throw here and leave the reader with nothing at all.
   if (!root) return ''
   const walker = doc.createTreeWalker(root, SHOW_TEXT)
   const parts = []
+  let text = ''
+  let previousBlock = null
   let node
   while ((node = walker.nextNode()) !== null) {
     if (!node.nodeValue.trim()) continue
     if (node.parentElement?.closest(SKIP_SELECTOR)) continue
-    parts.push(node.nodeValue)
+    if (blocks) {
+      const block = nearestBlock(node.parentElement, root)
+      text += (text ? (block === previousBlock ? ' ' : '\n') : '') + node.nodeValue
+      previousBlock = block
+    } else {
+      parts.push(node.nodeValue)
+    }
   }
-  return parts.join(' ')
+  return blocks ? text : parts.join(' ')
 }
 
 // Visible text from saved bytes: what a reader sees, not the markup around it.
@@ -142,8 +165,8 @@ export function textFromSavedPage (raw) {
 // they read. Callers can swap one for the other without changing a rule.
 export function domText (doc) {
   return {
-    text (root) {
-      return readableText(doc, root)
+    text (root, options) {
+      return readableText(doc, root, options?.blocks === true)
     }
   }
 }

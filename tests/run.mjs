@@ -6,13 +6,14 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scan, summarise, verdictLine } from '../src/scan.js'
+import { scan, sentenceParts, summarise, verdictLine } from '../src/scan.js'
 import { RULES, ruleById } from '../src/rules.js'
 import {
   bytesText, domText, isSkippedElement, textFromSavedPage,
   SKIP_ATTRIBUTES, SKIP_IDS, SKIP_SELECTOR, SKIP_TAGS
 } from '../src/text.js'
 import { countPages, MIN_WORDS } from '../src/corpus.js'
+import { RECITALS, quotedExamples } from '../src/recitals.js'
 
 let passed = 0
 let failed = 0
@@ -112,28 +113,56 @@ const RECITAL_9 = [
 
 const RECITAL_12 = [
   ['climate neutral', 'This carton is climate neutral.', 'offset', 'Annex I, point 4c'],
-  ['CO2 neutral certified', 'This carton is CO2 neutral certified.', 'offset', 'Annex I, point 4c'],
+  ['CO₂ neutral certified', 'This carton is CO₂ neutral certified.', 'offset', 'Annex I, point 4c'],
   ['carbon positive', 'This carton is carbon positive.', 'offset', 'Annex I, point 4c'],
   ['climate net zero', 'This carton is climate net zero.', 'offset', 'Annex I, point 4c'],
   ['climate compensated', 'This carton is climate compensated.', 'offset', 'Annex I, point 4c'],
   ['reduced climate impact', 'A carton with reduced climate impact.', 'offset', 'Annex I, point 4c'],
-  ['limited CO2 footprint', 'A carton with a limited CO2 footprint.', 'offset', 'Annex I, point 4c'],
+  ['limited CO₂ footprint', 'A carton with a limited CO₂ footprint.', 'offset', 'Annex I, point 4c'],
 ]
 
 function conformance (recital, table, count) {
-  test(`every phrase Recital ${recital} quotes maps to its rule and citation`, () => {
+  test(`every phrase Recital ${recital} quotes appears verbatim and maps to its rule`, () => {
     equal(table.length, count, `Recital ${recital} quotes ${count} examples`)
+    const source = RECITALS[recital]
+    const quotes = quotedExamples(recital)
+    equal(quotes.length, table.length, `Recital ${recital} quotes ${quotes.length} phrases, the table has ${table.length}`)
     for (const [quote, text, ruleId, citation] of table) {
+      assert(source.includes(quote), `${quote} does not appear verbatim in the vendored Recital ${recital}`)
+      const rule = ruleById(ruleId)
+      assert(rule, `${quote} maps to missing rule ${ruleId}`)
+      assert(new RegExp(rule.pattern.source, rule.pattern.flags.replace('g', '')).test(quote), `rule ${ruleId} does not match its quoted phrase ${quote}`)
       assert(text.toLowerCase().includes(quote.toLowerCase()), `${quote} is not in the sample text`)
       const fired = [...new Set(scan(text).map(hit => hit.ruleId))]
       equal(fired.join('|'), ruleId, `${quote} produced ${fired.join('|') || 'no findings'}`)
-      equal(ruleById(ruleId).citation, citation, `${quote} cites the wrong article`)
+      equal(rule.citation, citation, `${quote} cites the wrong article`)
     }
+  })
+}
+
+// The other direction: parse the phrases out of the vendored recital and make
+// sure the rule table covers every one. A new quote in the directive fails here
+// even if nobody remembers to add it to the table above.
+function recitalCoverage (recital, table) {
+  test(`every phrase Recital ${recital} names is covered by a rule (parsed from the text)`, () => {
+    const rows = new Map(table.map(row => [row[0], row]))
+    const quotes = quotedExamples(recital)
+    assert(quotes.length > 0, `Recital ${recital} yielded no quoted phrases`)
+    for (const quote of quotes) {
+      const row = rows.get(quote)
+      assert(row, `Recital ${recital} names “${quote}” but no rule row covers it`)
+      const [, sample, ruleId] = row
+      const fired = [...new Set(scan(sample).map(hit => hit.ruleId))]
+      equal(fired.join('|'), ruleId, `“${quote}” produced ${fired.join('|') || 'no findings'}`)
+    }
+    equal(rows.size, quotes.length, `the Recital ${recital} table has a row the text does not name`)
   })
 }
 
 conformance(9, RECITAL_9, 12)
 conformance(12, RECITAL_12, 7)
+recitalCoverage(9, RECITAL_9)
+recitalCoverage(12, RECITAL_12)
 
 // The same words in ordinary use, and specific claims the directive does not
 // blacklist, must stay quiet. ``green`` is only a claim when it is attached to a
@@ -192,7 +221,24 @@ test('every finding reads back to a real rule', () => {
   for (const hit of scan(FIXTURE)) {
     assert(ruleById(hit.ruleId), `unknown rule id ${hit.ruleId}`)
     assert(hit.context.length > hit.span.length, 'context missing')
+    assert(hit.sentence.includes(hit.span), 'sentence missing the matched span')
   }
+})
+
+test('each finding carries the sentence around the match', () => {
+  const hits = scan('Recycled body. Our eco-friendly bottle is here. Ships flat.')
+  equal(hits.length, 1)
+  equal(hits[0].sentence, 'Our eco-friendly bottle is here.')
+  const parts = sentenceParts(hits[0])
+  equal(parts.before, 'Our ')
+  equal(parts.match, 'eco-friendly')
+  equal(parts.after, ' bottle is here.')
+})
+
+test('a heading on its own line does not join the first sentence', () => {
+  const [hit] = scan('Fern & Fold Bottle\n£28 · 750 ml\nOur eco-friendly bottle.')
+  equal(hit.sentence, 'Our eco-friendly bottle.')
+  equal(sentenceParts(hit).before, 'Our ')
 })
 
 test('findings come back in reading order', () => {
@@ -400,6 +446,19 @@ test('the DOM adapter drops text inside a skipped region', () => {
   equal(domText(doc).text({}), 'Our eco-friendly bottle')
 })
 
+test('block mode keeps a heading off the paragraph that follows', () => {
+  const root = { closest: () => null }
+  const heading = { tagName: 'H1', parentElement: root, closest: () => null }
+  const para = { tagName: 'P', parentElement: root, closest: () => null }
+  const node = (value, parent) => ({ nodeValue: value, parentElement: parent })
+  const doc = stubDocument([
+    node('Fern & Fold Bottle', heading),
+    node('Our eco-friendly bottle.', para)
+  ])
+  equal(domText(doc).text({}, { blocks: true }), 'Fern & Fold Bottle\nOur eco-friendly bottle.')
+  equal(domText(doc).text({}), 'Fern & Fold Bottle Our eco-friendly bottle.')
+})
+
 test('the two adapters are built from one skip definition', () => {
   for (const tag of SKIP_TAGS) {
     assert(SKIP_SELECTOR.includes(tag), `${tag} missing from the DOM selector`)
@@ -453,6 +512,30 @@ test('corpus script: a page counts once, however many claims it carries', () => 
   equal(report.pagesRead, 1, 'pages read')
   equal(report.findings, 4, 'findings are counted per hit')
   equal(report.pagesWithBannedClaim, 1, 'the page was counted more than once')
+}))
+
+test('corpus script: a mixed folder accumulates per-rule counts and rates pages read', () => withFolder(dir => {
+  savePage(dir, '001-banned.html', `eco-friendly ${filler(29)}`)
+  savePage(dir, '002-banned.html', `eco-friendly ${filler(29)}`)
+  savePage(dir, '003-clean.html', `Body is 100% recycled aluminium. ${filler(28)}`)
+  savePage(dir, '004-short.html', 'Eco-friendly.')
+
+  const { status, stdout } = corpus(dir, '--json')
+  equal(status, 0)
+  const report = JSON.parse(stdout)
+  equal(report.pagesRead, 3, 'the short save is not a page read')
+  equal(report.skipped, 1, 'the short save is reported separately')
+  equal(report.pagesWithBannedClaim, 2, 'the two banned pages count once each')
+  equal(report.bannedRate, 66.7, 'the rate uses pages read, not files saved')
+  equal(report.findings, 2, 'one finding on each banned page')
+  equal(report.byRule.generic, 2, 'the per-rule count accumulates across pages')
+
+  const clean = report.pages.find(page => page.file === '003-clean.html')
+  assert(clean, 'the clean page is missing from the report')
+  equal(clean.banned, 0, 'the clean page was flagged')
+
+  const text = corpus(dir).stdout
+  assert(/^\s*2 pages\s+banned\s+generic$/m.test(text), text)
 }))
 
 test('corpus script: a save under 30 words is skipped, not counted clean', () => withFolder(dir => {

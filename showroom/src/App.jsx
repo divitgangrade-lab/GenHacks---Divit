@@ -62,7 +62,7 @@ class Boundary extends Component {
   }
 }
 
-function Tile ({ name, tall, children }) {
+function Tile ({ name, children }) {
   const ref = useRef(null)
   const [shown, setShown] = useState(false)
 
@@ -79,7 +79,7 @@ function Tile ({ name, tall, children }) {
   }, [shown])
 
   return (
-    <div ref={ref} className={`tile${tall ? ' tile--tall' : ''}`}>
+    <div ref={ref} className="tile">
       <div className="tile__stage">
         {shown ? <Boundary name={name}>{children}</Boundary> : <span className="tile__idle">·</span>}
       </div>
@@ -111,18 +111,18 @@ const TEXT_TILES = [
   { name: 'CircularText', node: <RB.CircularText text="CLAIM CHECK · " size={170} fontSize={19} /> },
   { name: 'CountUp', node: <RB.CountUp to={2026} from={1990} duration={3} className="big" /> },
   { name: 'DecryptedText', node: <RB.DecryptedText text="ECO-FRIENDLY?" sequential speed={40} /> },
-  { name: 'FoldText', node: <RB.FoldText text="Unfolding" /> },
+  { name: 'FoldText', node: <RB.FoldText text="Unfolding" fontSize={64} /> },
   { name: 'MaskedHeading', node: <RB.MaskedHeading text="Behind the claim" /> },
   { name: 'RotatingText', node: <RB.RotatingText texts={['Banned', 'Unproven', 'Offset', 'Generic']} /> },
   { name: 'ScrambledText', node: <RB.ScrambledText radius={140}>Hover to scramble</RB.ScrambledText> },
   { name: 'ScrollFloat', node: <RB.ScrollFloat>Floating words</RB.ScrollFloat> },
-  { name: 'Shuffle', node: <RB.Shuffle text="Shuffle me" /> },
+  { name: 'Shuffle', node: <RB.Shuffle text="Shuffle me" style={{ fontSize: '1.75rem', margin: 0 }} /> },
   { name: 'SplitText', node: <RB.SplitText text="Split apart" splitType="chars" /> },
-  { name: 'StrokeText', node: <RB.StrokeText text="Outline" /> },
+  { name: 'StrokeText', node: <RB.StrokeText text="Outline" fontSize={96} /> },
   { name: 'TextLoop', node: <RB.TextLoop text="Looping ribbon" /> },
   { name: 'TextType', node: <RB.TextType text={['Typing…', 'the verdict', 'four claims']} /> },
   { name: 'TrueFocus', node: <RB.TrueFocus sentence="Focus the claim" /> },
-  { name: 'WarpText', node: <RB.WarpText text="Bend the claim" /> },
+  { name: 'WarpText', node: <RB.WarpText text="Bend the claim" fontSize={32} style={{ minHeight: 0, height: '100%' }} /> },
 ]
 
 const SCROLL_TILES = [
@@ -194,14 +194,14 @@ const CURSOR_TILES = [
   { name: 'TargetCursor', node: <RB.TargetCursor /> }
 ]
 
-function Section ({ title, count, children }) {
+function Section ({ title, count, className, children }) {
   return (
     <section className="section">
       <div className="section__head">
         <h2>{title}</h2>
         <span>{count} components</span>
       </div>
-      <div className="grid">{children}</div>
+      <div className={`grid${className ? ` ${className}` : ''}`}>{children}</div>
     </section>
   )
 }
@@ -268,8 +268,8 @@ export default function App () {
         {SURFACE_TILES.map(({ name, node }) => <Tile key={name} name={name}>{node}</Tile>)}
       </Section>
 
-      <Section title="Canvas" count={CANVAS_TILES.length}>
-        {CANVAS_TILES.map(({ name, node }) => <Tile key={name} name={name} tall>{node}</Tile>)}
+      <Section title="Canvas" count={CANVAS_TILES.length} className="grid--canvas">
+        {CANVAS_TILES.map(({ name, node }) => <Tile key={name} name={name}>{node}</Tile>)}
       </Section>
 
       <Cursors />

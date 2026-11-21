@@ -1,4 +1,4 @@
-import { scan, summarise, verdictLine } from './src/scan.js'
+import { scan, sentenceParts, summarise, verdictLine } from './src/scan.js'
 import { RULES, TAG_LABEL, ruleById } from './src/rules.js'
 import { escapeHtml } from './src/escape.js'
 
@@ -32,13 +32,14 @@ function renderFindings () {
 
   el.findings.innerHTML = hits.map(hit => {
     const rule = ruleById(hit.ruleId)
+    const { before, match, after } = sentenceParts(hit)
     return `
       <li>
+        <p class="findings__sentence">${escapeHtml(before)}<mark>${escapeHtml(match)}</mark>${escapeHtml(after)}</p>
         <p class="findings__head">
-          <span class="findings__span">${escapeHtml(hit.span)}</span>
           <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span>
+          <span class="findings__rule">${escapeHtml(rule.title)}</span>
         </p>
-        <p class="findings__rule">${escapeHtml(rule.title)}</p>
         <p class="findings__cite">${escapeHtml(rule.citation)}</p>
       </li>`
   }).join('')
@@ -71,38 +72,55 @@ function bootBookmarklet (reportUrl, demoUrl) {
     }
     if (document.getElementById(NOTICE)) return;
 
-    var box = document.createElement('div');
-    box.id = NOTICE;
-    box.setAttribute('role', 'status');
-    box.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:2147483647;max-width:320px;padding:12px 34px 12px 14px;background:#fff;color:#111;font:14px/1.45 system-ui,-apple-system,sans-serif;border:1px solid #c9c5ba;border-radius:3px;box-shadow:0 8px 30px rgba(0,0,0,.25)';
-
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.textContent = '\u00d7';
-    close.setAttribute('aria-label', 'Close');
-    close.style.cssText = 'position:absolute;top:2px;right:6px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:#555';
-    close.onclick = function () { box.remove(); };
+    /* A dialog is used instead of a styled div because a strict page often
+       blocks inline styles along with the module. showModal() puts the
+       message in the browser's top layer with its own default styling, so
+       the explanation is visible even when page CSS and inline styles are
+       refused. */
+    var dialog = document.createElement('dialog');
+    dialog.id = NOTICE;
+    dialog.setAttribute('aria-label', 'Claim Check could not load');
 
     var text = document.createElement('p');
-    text.style.margin = '0';
     text.textContent = 'Claim Check could not load on this page. The site\u2019s security policy may be blocking its script.';
 
     var link = document.createElement('a');
     link.href = demoUrl;
-    link.textContent = 'Try the demo instead';
-    link.style.cssText = 'display:inline-block;margin-top:6px;color:#0e3d33;font-weight:600';
+    link.textContent = 'Open the demo instead';
 
-    box.appendChild(close);
-    box.appendChild(text);
-    box.appendChild(link);
-    ;(document.body || document.documentElement).appendChild(box);
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.onclick = function () {
+      if (typeof dialog.close === 'function') dialog.close(); else dialog.remove();
+    };
+
+    var actions = document.createElement('p');
+    actions.appendChild(link);
+    actions.appendChild(document.createTextNode(' '));
+    actions.appendChild(close);
+
+    dialog.appendChild(text);
+    dialog.appendChild(actions);
+    dialog.addEventListener('close', function () { dialog.remove(); });
+
+    ;(document.body || document.documentElement).appendChild(dialog);
+    if (typeof dialog.showModal === 'function') {
+      try {
+        dialog.showModal();
+      } catch (e) {
+        dialog.setAttribute('open', '');
+      }
+    } else {
+      dialog.setAttribute('open', '');
+    }
 
     /* The script may simply have been slow. Drop the notice if the panel
        arrives after all. */
     var poll = setInterval(function () {
       if (!document.getElementById(PANEL)) return;
       clearInterval(poll);
-      box.remove();
+      if (typeof dialog.close === 'function') dialog.close(); else dialog.remove();
     }, 250);
     setTimeout(function () { clearInterval(poll); }, 15000);
   }
