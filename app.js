@@ -58,8 +58,11 @@ function renderFindings () {
 // address the site is actually served from, and imports the same scanner the
 // page just ran.
 function buildBookmarklet () {
+  // GitHub Pages serves these files with a ten-minute cache, so a reader who
+  // clicked an hour ago can still be running yesterday's scanner. Stamping the
+  // URL with the click time makes the bookmarklet always fetch the current one.
   const target = new URL('./report.js', window.location.href).href
-  const code = `javascript:(function(){var s=document.createElement('script');s.type='module';s.src='${target}';document.head.appendChild(s);})()`
+  const code = `javascript:(function(){var s=document.createElement('script');s.type='module';s.src='${target}?t='+Date.now();document.head.appendChild(s);})()`
   el.bookmarklet.setAttribute('href', code)
   el.bookmarkletUrl.textContent = code.length > 90 ? `${code.slice(0, 88)}…` : code
   el.bookmarklet.title = 'Drag this to your bookmarks bar'

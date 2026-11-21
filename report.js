@@ -49,11 +49,11 @@ const STYLES = `
   a { color: #0e3d33; }
 `
 
-export function readableText (doc) {
+export function readableText (doc, root) {
   // Not dead code: a bookmarklet injected before a body exists would otherwise
   // throw here and leave the reader with nothing at all.
-  if (!doc.body) return ''
-  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT)
+  if (!root) return ''
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT)
   const parts = []
   let node
   while ((node = walker.nextNode()) !== null) {
@@ -104,5 +104,10 @@ function renderPanel (doc, hits) {
   return host
 }
 
+// The demo page names the product card as its scan subject, so the rule table
+// above it — which quotes the banned phrases on purpose — is never counted. The
+// #fixture fallback is what makes this survive a page served from an older
+// cache, before the marker existed: the id was there from the first version.
 document.getElementById(HOST_ID)?.remove()
-renderPanel(document, scan(readableText(document)))
+const subject = document.querySelector('[data-scan-root], #fixture') ?? document.body
+renderPanel(document, scan(readableText(document, subject)))
