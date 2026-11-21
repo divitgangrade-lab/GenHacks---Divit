@@ -110,7 +110,7 @@ const SURFACE_TILES = [
   { name: 'GlareHover', node: <RB.GlareHover height="120px" width="180px"><div className="demo demo--box">Glare</div></RB.GlareHover> },
   { name: 'GradualBlur', node: <div className="demo demo--blur">Blurred edge</div> },
   { name: 'ImageTrail', node: <RB.ImageTrail items={[swatch('#7df9ff'), swatch('#f4a261'), swatch('#e76f51')]} /> },
-  { name: 'LogoLoop', node: <RB.LogoLoop logos={[{ src: swatch('#7df9ff'), alt: 'One' }, { src: swatch('#f4a261'), alt: 'Two' }, { src: swatch('#e76f51'), alt: 'Three' }]} /> },
+  { name: 'LogoLoop', node: <RB.LogoLoop logos={['Claim', 'Check', 'Banned', 'Offsets'].map(word => ({ node: <span className="demo demo--chip">{word}</span>, title: word }))} /> },
   { name: 'Magnet', node: <RB.Magnet><span className="demo demo--chip">Magnet</span></RB.Magnet> },
   { name: 'MorphSlider', node: <RB.MorphSlider /> },
   { name: 'MicroSlats', node: <RB.MicroSlats /> },
