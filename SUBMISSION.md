@@ -1,6 +1,6 @@
 # GenHacks 2026 submission pack
 
-Deadline: 26 December 2026, 12:00am EST. This file is the copy to paste into Devpost, plus the shot list for the demo video. Nothing here is recorded yet.
+Deadline: 26 December 2026, 12:00am EST. This file is the copy to paste into Devpost, plus the shot list for the demo video. Nothing here is recorded yet. Field-by-field paste-in copy, tags, links and the gallery images are in [DEVPOST.md](DEVPOST.md).
 
 ## Track
 
