@@ -45,7 +45,7 @@ Nothing has to be marked on a shop page: an unmarked page is read in full. The s
 
 ### The motion showroom
 
-`showroom/` is a separate Vite + React app holding 50 React Bits components, fetched as source from the registry and mounted one per tile. Build it with `npm run build:showroom`; the output in `motion/` is committed so GitHub Pages serves it without a build step. The component files are vendored under React Bits' MIT + Commons Clause licence, by David Haz, and are used as fetched rather than rewritten.
+`showroom/` is a separate Vite + React app holding 50 React Bits components, fetched as source from the registry and mounted one per tile. Build it with `npm run build:showroom`; the output in `motion/` is committed so GitHub Pages serves it without a build step. The 50 component files in `showroom/src/components/` are vendored as fetched from the React Bits registry under the MIT + Commons Clause License Condition v1.0, copyright © 2026 David Haz, and are used as fetched rather than rewritten. That licence is not the repo's MIT licence: the Commons Clause forbids selling, sublicensing or redistributing the components themselves, alone, in a bundle or as a ported version, which is why they are included only as part of this demo application. The full text sits in `showroom/src/components/LICENSE.md` and in the built site at `motion/react-bits-LICENSE.txt`.
 
 ## Run it
 
