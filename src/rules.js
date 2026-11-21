@@ -33,7 +33,7 @@ export const RULES = [
     // that clause applied, not phrases the Commission quotes.
     pattern: /\b(?:planet|earth)[- ]friendly\b|\benvironmentally sound\b|\beco[- ]conscious\b/gi,
     says: 'The blacklist gives examples and then adds "or similar statements". Wording that sells the same vague promise falls under the same ban.',
-    evidence: 'Identical to any generic claim: recognised excellent environmental performance for this product, stated on the same page.',
+    evidence: 'The same evidence as a generic claim: recognised excellent environmental performance for this product, stated on the same page.',
   },
   {
     id: 'green',

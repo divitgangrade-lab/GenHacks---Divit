@@ -3,9 +3,10 @@
   --raised: #fffdf8;
   --ink: #191713;
   --ink-soft: #4a453c;
-  --muted: #7a7264;
+  --muted: #6f6658;
   --rule: #ded6c5;
   --rule-strong: #c2b8a3;
+  --wash: #f1ece0;
   --accent: #14584b;
   --accent-ink: #0e3d33;
   --banned: #8a2f21;
@@ -27,7 +28,7 @@ body {
 }
 
 h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0; }
-p { margin: 0; }
+p { margin: 0; text-wrap: pretty; }
 a { color: var(--accent-ink); text-underline-offset: 2px; }
 a:hover { color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -52,7 +53,7 @@ a:hover { color: var(--ink); }
 }
 
 .kicker {
-  font-size: .76rem; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--muted); margin-bottom: 1rem;
 }
 
@@ -71,47 +72,45 @@ a:hover { color: var(--ink); }
   border-bottom: 1px solid var(--rule);
 }
 
-.install h2 { font-size: 1.15rem; margin-bottom: .5rem; }
-.install p { max-width: 62ch; font-size: .95rem; color: var(--ink-soft); }
+.install h2 { font-size: 1.3rem; margin-bottom: .75rem; }
+/* :where keeps container defaults weak enough that a class on the paragraph
+   still wins, which is what stops the hint from inheriting the body size. */
+:where(.install) p { max-width: 62ch; font-size: .9375rem; color: var(--ink-soft); }
 
 .install__row {
   display: flex; flex-wrap: wrap; align-items: center; gap: .85rem;
-  margin-top: 1rem !important;
+  margin: 1rem 0 0;
 }
 
 .bookmarklet {
   display: inline-block; padding: .7rem 1.1rem; min-height: 44px;
-  background: var(--accent); color: #fff; text-decoration: none;
-  border-radius: 2px; font-size: .95rem; cursor: grab;
+  background: var(--accent); color: var(--raised); text-decoration: none;
+  border-radius: 2px; font-size: .9375rem; cursor: grab;
   border: 1px solid var(--accent);
+  transition: background-color 140ms ease-out, border-color 140ms ease-out;
 }
-.bookmarklet:hover { background: var(--accent-ink); color: #fff; }
+.bookmarklet:hover { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--raised); }
 .bookmarklet:active { cursor: grabbing; }
 
-.install__note {
-  font-family: var(--mono); font-size: .72rem; color: var(--muted);
-  max-width: 100%; overflow-wrap: anywhere;
-}
-
-.hint { font-size: .8rem; color: var(--muted); margin-top: .75rem !important; }
+.hint { font-size: .875rem; color: var(--muted); margin-top: .75rem; }
 
 /* layout */
 
-.layout {
-  max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem;
-  display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+.layout { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* The product and its findings are one spread, not two cards: the divider runs
+   the full height of both columns, so the shorter side does not read as a gap. */
+.demo {
+  display: grid; background: var(--raised);
+  border: 1px solid var(--rule); border-radius: 2px;
 }
+
+.panel { padding: 1.4rem; }
+.panel + .panel { border-top: 1px solid var(--rule); }
 
 @media (min-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
-}
-
-.panel {
-  background: var(--raised);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  padding: 1.4rem;
+  .demo { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
+  .panel + .panel { border-top: 0; border-left: 1px solid var(--rule); }
 }
 
 .panel__label {
@@ -122,15 +121,15 @@ a:hover { color: var(--ink); }
 /* fixture product */
 
 .product h2 { font-size: 1.35rem; margin-bottom: .2rem; }
-.product__price { font-family: var(--mono); font-size: .82rem; color: var(--muted); margin-bottom: 1rem; }
-.product p { font-size: .97rem; color: var(--ink-soft); }
+.product__price { font-family: var(--mono); font-size: .8125rem; color: var(--muted); margin-bottom: 1rem; }
+.product p { font-size: .9375rem; color: var(--ink-soft); }
 .product p + p { margin-top: .8rem; }
-.product__aside { font-style: italic; color: var(--muted) !important; }
+.product p.product__aside { font-style: italic; color: var(--muted); }
 
 /* findings */
 
 .verdict {
-  font-size: .95rem; margin-bottom: 1rem;
+  font-size: .9375rem; margin-bottom: 1rem;
   padding-left: .8rem; border-left: 3px solid var(--rule-strong);
 }
 
@@ -145,16 +144,16 @@ a:hover { color: var(--ink); }
 .findings__head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 
 .findings__span {
-  font-family: var(--mono); font-size: .85rem;
-  background: #f1ece0; padding: .1rem .35rem; border-radius: 2px;
+  font-family: var(--mono); font-size: .875rem;
+  background: var(--wash); padding: .1rem .35rem; border-radius: 2px;
 }
 
-.findings__rule { margin-top: .35rem; font-size: .95rem; }
+.findings__rule { margin-top: .35rem; font-size: .9375rem; }
 
-.findings__cite { font-size: .78rem; color: var(--muted); }
+.findings__cite { font-size: .875rem; color: var(--muted); }
 
 .tag {
-  display: inline-block; font-size: .68rem; letter-spacing: .08em;
+  display: inline-block; font-size: .6875rem; letter-spacing: .08em;
   text-transform: uppercase; padding: .1rem .4rem; border-radius: 2px;
   font-family: var(--sans);
 }
@@ -165,25 +164,31 @@ a:hover { color: var(--ink); }
 /* rules */
 
 .rules {
-  max-width: 1080px; margin: 0 auto; padding: 1rem 1.5rem 2.5rem;
+  max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem 2.5rem;
   border-top: 1px solid var(--rule);
 }
 
 .rules h2 { font-size: 1.3rem; margin-bottom: 1.2rem; }
-.rules__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+.rules__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.75rem 2rem; }
 
 @media (min-width: 900px) {
   .rules__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .rules__list li { border-left: 2px solid var(--rule); padding-left: 1rem; }
-.rules__list h3 { font-size: 1rem; margin-bottom: .25rem; }
-.rules__list p { font-size: .9rem; color: var(--ink-soft); }
-.rule__citation { font-size: .76rem; color: var(--muted); margin-bottom: .35rem; }
-.rule__evidence { margin-top: .35rem; font-size: .84rem; color: var(--muted); }
+.rules__list h3 { font-size: 1.0625rem; margin-bottom: .3rem; }
+:where(.rules__list) p { font-size: .9375rem; color: var(--ink-soft); }
+/* Two columns so the tag always sits at the left edge, and a long citation
+   wraps under itself instead of pushing the tag onto its own line. */
+.rule__citation {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline; gap: .45rem;
+  font-size: .875rem; color: var(--muted); margin-bottom: .35rem;
+}
+.rule__evidence { margin-top: .35rem; font-size: .875rem; color: var(--muted); }
 
 .rules__note {
-  margin-top: 1.5rem; font-size: .85rem; color: var(--muted);
+  margin-top: 1.5rem; font-size: .875rem; color: var(--muted);
   max-width: 68ch; border-top: 1px solid var(--rule); padding-top: 1rem;
 }
 
@@ -191,7 +196,7 @@ a:hover { color: var(--ink); }
 
 .site-foot {
   max-width: 1080px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem;
-  border-top: 1px solid var(--rule); font-size: .84rem; color: var(--muted);
+  border-top: 1px solid var(--rule); font-size: .875rem; color: var(--muted);
 }
 
 .noscript { padding: 1rem 1.5rem; }

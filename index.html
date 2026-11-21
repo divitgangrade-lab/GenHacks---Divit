@@ -20,39 +20,40 @@
 
   <section class="install" aria-labelledby="install-heading" data-scan-skip>
     <h2 id="install-heading">Use it on a real page</h2>
-    <p>Drag this button to your bookmarks bar. On any product page, click it. Nothing is sent anywhere: the check runs in the page you are already on.</p>
+    <p>Drag this button to your bookmarks bar. On any product page, click it. The button is the whole program, one line of JavaScript that loads the scanner from this site, and the page text never leaves your browser.</p>
     <p class="install__row">
       <a class="bookmarklet" id="bookmarklet" href="#" draggable="true">Check this page</a>
-      <span class="install__note" id="bookmarklet-url">Building the bookmarklet…</span>
     </p>
-    <p class="hint">Bookmarklets do not work on browser-internal pages, and some sites block them. If one does, paste the address from the box above into the page instead. Run it on this page and it will also flag the rule table below, which quotes the banned phrases on purpose.</p>
+    <p class="hint">Bookmarklets do not run on browser-internal pages, and some sites block them. Run it on this page and it will also flag the rule table below, which quotes the banned phrases on purpose.</p>
   </section>
 
   <main class="layout">
-    <section class="panel" aria-labelledby="product-heading">
-      <p class="panel__label">A page to check</p>
-      <article id="fixture" class="product" data-scan-root>
-        <h2 id="product-heading">Fern &amp; Fold Bamboo Bottle</h2>
-        <p class="product__price">£28 · 750 ml</p>
-        <p>Our eco-friendly bottle is carbon neutral and packaged in biodegradable wrap. Every order is eco-certified by our own sustainability team, so you can go green without thinking about it.</p>
-        <p>We are proud to be net zero by 2040.</p>
-        <p class="product__aside">Pairs well with green tea and green beans.</p>
-      </article>
-      <p class="hint">Synthetic copy, written for this demo. The last line is a decoy: "green tea" is not an environmental claim.</p>
-    </section>
+    <div class="demo">
+      <section class="panel" aria-labelledby="product-heading">
+        <p class="panel__label">A page to check</p>
+        <article id="fixture" class="product" data-scan-root>
+          <h2 id="product-heading">Fern &amp; Fold Bamboo Bottle</h2>
+          <p class="product__price">£28 · 750 ml</p>
+          <p>Our eco-friendly bottle is carbon neutral and packaged in biodegradable wrap. Every order is eco-certified by our own sustainability team, so you can go green without thinking about it.</p>
+          <p>We are proud to be net zero by 2040.</p>
+          <p class="product__aside">Pairs well with green tea and green beans.</p>
+        </article>
+        <p class="hint">Synthetic copy, written for this demo. The last line is a decoy: "green tea" is not an environmental claim.</p>
+      </section>
 
-    <section class="panel panel--result" aria-labelledby="result-heading">
-      <p class="panel__label">What the checker finds</p>
-      <h2 id="result-heading" class="sr-only">Findings</h2>
-      <p class="verdict" id="verdict" aria-live="polite"></p>
-      <ul class="findings" id="findings" data-scan-skip></ul>
-      <p class="hint" id="scanned"></p>
-    </section>
+      <section class="panel" aria-labelledby="result-heading">
+        <p class="panel__label">What the checker finds</p>
+        <h2 id="result-heading" class="sr-only">Findings</h2>
+        <p class="verdict" id="verdict" aria-live="polite"></p>
+        <ul class="findings" id="findings" data-scan-skip></ul>
+        <p class="hint" id="scanned"></p>
+      </section>
+    </div>
   </main>
 
   <section class="rules" aria-labelledby="rules-heading" data-scan-skip>
     <h2 id="rules-heading">What this checks</h2>
-    <ol class="rules__list" id="rules-list"></ol>
+    <ul class="rules__list" id="rules-list"></ul>
     <p class="rules__note">Informational, not legal advice. Enforcement is national: the directive had to be transposed by 27 March 2026 and applies from 27 September 2026.</p>
   </section>
 

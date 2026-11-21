@@ -18,6 +18,7 @@ Yet most shop pages still carry them. Claim Check reads the page, finds those cl
 ```
 src/rules.js   the rule set: pattern, plain-English reading, citation, evidence
 src/scan.js    pure functions: text in, findings out (no DOM, no network)
+src/escape.js  HTML escaping, shared by both renderers
 report.js      bookmarklet entry: reads the page, renders the panel in a shadow root
 app.js         the demo page, and its own renderer
 tests/run.mjs  21 assertions against the scanner

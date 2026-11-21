@@ -4,6 +4,7 @@
 
 import { scan, summarise, verdictLine } from './src/scan.js'
 import { TAG_LABEL, ruleById, SOURCES } from './src/rules.js'
+import { escapeHtml } from './src/escape.js'
 
 const HOST_ID = 'claim-check-panel'
 
@@ -12,12 +13,6 @@ const HOST_ID = 'claim-check-panel'
 // product, not the commentary. Off by default: on a real shop page nothing is
 // marked, so everything is read.
 const SKIP = '[data-scan-skip], #claim-check-panel, script, style, noscript, svg, template, [hidden]'
-
-const escapeHtml = value => String(value)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
 
 const STYLES = `
   :host { all: initial; }
@@ -32,8 +27,12 @@ const STYLES = `
   }
   header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 16px 10px; border-bottom: 1px solid #ded6c5; }
   h2 { margin: 0; font: 600 17px/1.2 "Iowan Old Style", Palatino, Georgia, serif; }
-  button { font: inherit; background: none; border: 0; cursor: pointer; color: #7a7264; padding: 4px 6px; min-height: 32px; }
+  button {
+    font: inherit; background: none; border: 0; cursor: pointer; color: #6f6658;
+    padding: 10px 10px; min-height: 44px; margin: -10px -10px -10px 0;
+  }
   button:hover { color: #191713; }
+  button:focus-visible { outline: 2px solid #14584b; outline-offset: 2px; }
   .body { padding: 12px 16px 16px; }
   .verdict { margin: 0 0 12px; font-size: 14px; color: #4a453c; }
   ul { list-style: none; margin: 0; padding: 0; }
@@ -44,7 +43,8 @@ const STYLES = `
   .tag.banned { background: #f8ece8; color: #8a2f21; }
   .tag.needs-evidence { background: #f4efe2; color: #7c5310; }
   .rule { margin: 6px 0 0; font-size: 13px; color: #4a453c; }
-  .cite { margin: 4px 0 0; font-size: 12px; color: #7a7264; }
+  .cite { margin: 4px 0 0; font-size: 12px; color: #6f6658; }
+  .cite--fix { color: #4a453c; }
   footer { padding: 10px 16px 14px; border-top: 1px solid #ded6c5; font-size: 12px; color: #7a7264; }
   a { color: #0e3d33; }
 `
@@ -74,7 +74,8 @@ function renderPanel (doc, hits) {
         <span class="span">${escapeHtml(hit.span)}</span>
         <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span>
         <p class="rule">${escapeHtml(rule.says)}</p>
-        <p class="cite">${escapeHtml(rule.citation)} · ${escapeHtml(rule.evidence)}</p>
+        <p class="cite">${escapeHtml(rule.citation)}</p>
+        <p class="cite cite--fix">To satisfy it: ${escapeHtml(rule.evidence)}</p>
       </li>`
   }).join('')
 

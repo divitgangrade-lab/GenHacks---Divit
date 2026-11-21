@@ -1,5 +1,6 @@
 import { scan, summarise, verdictLine } from './src/scan.js'
 import { RULES, TAG_LABEL, ruleById } from './src/rules.js'
+import { escapeHtml } from './src/escape.js'
 
 const el = {
   fixture: document.getElementById('fixture'),
@@ -8,22 +9,13 @@ const el = {
   scanned: document.getElementById('scanned'),
   rulesList: document.getElementById('rules-list'),
   bookmarklet: document.getElementById('bookmarklet'),
-  bookmarkletUrl: document.getElementById('bookmarklet-url'),
-}
-
-function escapeHtml (value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
 }
 
 function renderRules () {
   el.rulesList.innerHTML = RULES.map(rule => `
     <li>
       <h3>${escapeHtml(rule.title)}</h3>
-      <p class="rule__citation">${escapeHtml(rule.citation)} · <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span></p>
+      <p class="rule__citation"><span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span><span>${escapeHtml(rule.citation)}</span></p>
       <p>${escapeHtml(rule.says)}</p>
       <p class="rule__evidence">What would satisfy it: ${escapeHtml(rule.evidence)}</p>
     </li>
@@ -64,7 +56,6 @@ function buildBookmarklet () {
   const target = new URL('./report.js', window.location.href).href
   const code = `javascript:(function(){var s=document.createElement('script');s.type='module';s.src='${target}?t='+Date.now();document.head.appendChild(s);})()`
   el.bookmarklet.setAttribute('href', code)
-  el.bookmarkletUrl.textContent = code.length > 90 ? `${code.slice(0, 88)}…` : code
   el.bookmarklet.title = 'Drag this to your bookmarks bar'
 }
 
