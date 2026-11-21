@@ -19,7 +19,7 @@ export const RULES = [
     title: 'Generic environmental claim',
     severity: 'banned',
     citation: 'Annex I, point 4a',
-    pattern: /\b(?:eco[- ]?friendly|environmentally[- ]friendly|climate[- ]friendly|carbon[- ]friendly|gentle on the environment|nature'?s friend|environmentally correct|ecological(?:ly)?|energy[- ]efficient|biodegradable|biobased)\b/gi,
+    pattern: /\b(?:eco[- ]?friendly|environmentally[- ]friendly|climate[- ]friendly|carbon[- ]friendly|gentle on the environment|nature['’]?s friend|environmentally correct|ecological(?:ly)?|energy[- ]efficient|biodegradable|biobased)\b/gi,
     says: 'Generic claims are blacklisted unless the seller can show recognised excellent environmental performance for this specific claim.',
     evidence: 'An EU Ecolabel, a recognised national scheme such as Nordic Swan, or top performance under other EU law. "Energy efficient" can be shown with the top energy class under Regulation (EU) 2017/1369.',
   },

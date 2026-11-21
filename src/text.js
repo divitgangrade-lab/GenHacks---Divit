@@ -1,5 +1,5 @@
 // One definition of the text a reader sees. Two adapters implement the same
-// contract — { kind, text(source) => string } — so the bookmarklet (a live DOM)
+// contract — text(source) => string — so the bookmarklet (a live DOM)
 // and the corpus (saved bytes) cannot disagree about what counts as page text:
 //
 //   domText(document).text(root)   walks the text nodes under root
@@ -14,10 +14,6 @@
 export const SKIP_TAGS = ['script', 'style', 'noscript', 'template', 'svg', 'iframe']
 export const SKIP_ATTRIBUTES = ['data-scan-skip', 'hidden']
 export const SKIP_IDS = ['claim-check-panel']
-
-// <head> only exists in a saved file: the DOM walk starts at <body>, so its
-// <title> is page metadata for the bookmarklet, not text a reader sees.
-const SAVED_ONLY_TAGS = ['head']
 
 export const SKIP_SELECTOR = [
   ...SKIP_ATTRIBUTES.map(attribute => `[${attribute}]`),
@@ -35,8 +31,10 @@ const ID_MATCHERS = SKIP_IDS.map(
 // The byte reader has no DOM to ask, so the same definition becomes tag and
 // attribute matching. aria-hidden is deliberately not [hidden]: that text is
 // visible on the page and must be read.
+// <head> only exists in a saved file: the DOM walk starts at <body>, so its
+// <title> is page metadata for the bookmarklet, not text a reader sees.
 export function isSkippedElement (name, attrs) {
-  return SAVED_ONLY_TAGS.includes(name) ||
+  return name === 'head' ||
     SKIP_TAGS.includes(name) ||
     ATTRIBUTE_MATCHERS.some(matcher => matcher.test(attrs)) ||
     ID_MATCHERS.some(matcher => matcher.test(attrs))
@@ -91,17 +89,22 @@ function readableText (doc, root) {
   return parts.join(' ')
 }
 
-// The byte reader has no DOM to ask, so it has to find the end of a skipped
-// element itself. Depth counting is what keeps a nested div inside a marked div
-// from ending the region at the inner close tag.
+// Visible text from saved bytes: what a reader sees, not the markup around it.
+// One pass over the tags emits the text between them and drops everything inside
+// a skipped element, so the markup is never rebuilt and stripped again. Depth
+// counting keeps a nested div inside a marked div from ending the region at the
+// inner close tag.
 //
 // One thing this cannot match: HTML closes <p>, <li> and table cells at the
 // next sibling, so a hand-broken save that leaves one open reads differently in
 // a browser. A page saved by a browser already carries the closing tags, so the
 // corpus does not meet that shape.
-function dropSkipped (html) {
+export function textFromSavedPage (raw) {
+  const html = String(raw ?? '')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<![^>]*>|<\?[^>]*>/g, ' ')
   const tag = /<(\/?)([a-z][a-z0-9:-]*)\b([^>]*)>/gi
-  let out = ''
+  let text = ''
   let last = 0
   let skip = ''
   let depth = 0
@@ -110,42 +113,35 @@ function dropSkipped (html) {
   while ((match = tag.exec(html)) !== null) {
     const [, closing, rawName, attrs] = match
     const name = rawName.toLowerCase()
+    const between = html.slice(last, match.index)
+    last = tag.lastIndex
 
-    if (!skip) {
-      if (closing || !isSkippedElement(name, attrs)) continue
-      out += html.slice(last, match.index) + ' '
-      last = tag.lastIndex
-      if (closesItself(name, attrs)) continue
-      skip = name
-      depth = 1
+    if (skip) {
+      if (name !== skip) continue
+      depth += closing ? -1 : (closesItself(name, attrs) ? 0 : 1)
+      if (depth === 0) skip = ''
       continue
     }
 
-    if (name !== skip) continue
-    depth += closing ? -1 : (closesItself(name, attrs) ? 0 : 1)
-    if (depth === 0) {
-      skip = ''
-      last = tag.lastIndex
+    // A tag separates two text nodes, so it separates two words. The DOM
+    // adapter joins its text nodes with a space, and this keeps the two equal.
+    text += between + ' '
+    if (closing || !isSkippedElement(name, attrs)) continue
+    if (!closesItself(name, attrs)) {
+      skip = name
+      depth = 1
     }
   }
 
-  // A save can stop inside a skipped element. Everything after that opening tag
-  // is inside the region, so it goes too — the browser closes it at the end of
-  // the document for the same reason.
-  return skip ? out : out + html.slice(last)
-}
-
-// Visible text from saved bytes: what a reader sees, not the markup around it.
-export function textFromSavedPage (raw) {
-  const html = dropSkipped(String(raw ?? '').replace(/<!--[\s\S]*?-->/g, ' '))
-  return decodeEntities(html.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim()
+  return decodeEntities(skip ? text : text + html.slice(last))
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 // The contract: both adapters answer text(source) and say what kind of source
 // they read. Callers can swap one for the other without changing a rule.
 export function domText (doc) {
   return {
-    kind: 'dom',
     text (root) {
       return readableText(doc, root)
     }
@@ -154,7 +150,6 @@ export function domText (doc) {
 
 export function bytesText () {
   return {
-    kind: 'bytes',
     text (raw) {
       return textFromSavedPage(raw)
     }

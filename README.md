@@ -25,7 +25,7 @@ report.js      bookmarklet entry: reads the page, renders the panel in a shadow 
 app.js         the demo page, and its own renderer
 showroom/      the 50-component React Bits showroom (Vite + React, its own deps)
 motion/        the showroom's built output, committed for GitHub Pages
-tests/run.mjs  45 assertions against the scanner, page text and the corpus script
+tests/run.mjs  49 assertions against the scanner, page text and the corpus script
 scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
@@ -56,14 +56,14 @@ The motion showroom is the exception. It is a Vite + React app in `showroom/` wi
 ```bash
 npm install              # once, for the showroom only
 npm run build:showroom   # writes motion/
-npm test          # 45 assertions, no dependencies needed
+npm test          # 49 assertions, no dependencies needed
 npm run serve            # http://localhost:3000
 npm run corpus           # hit rate over saved pages, see below
 ```
 
 `package-lock.json` is committed, so `npm ci` reproduces the same dependency tree. The built `motion/` output is committed as well: after editing the showroom, rebuild it, or Pages keeps serving the old bundle.
 
-Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt.
+Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt. If a shop's Content-Security-Policy blocks that module, the bookmarklet leaves a small notice linking back to the demo instead of doing nothing. A policy that blocks `javascript:` URLs outright stops any bookmarklet before it can speak, which no page can work around.
 
 ## What it will not do
 

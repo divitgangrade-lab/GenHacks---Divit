@@ -89,6 +89,71 @@ test('the full demo page produces four banned and two evidence findings', () => 
   equal(summary.total, 6)
 })
 
+// Recital 9 and Recital 12 of Directive (EU) 2024/825 name the phrasings the
+// bans are about. Every quote is pinned to the rule that reads it and the
+// article that rule cites, so a renamed rule, a dropped pattern or a drifted
+// citation fails the build. A quoted phrase no rule matches is the regression
+// this table exists to catch.
+const RECITAL_9 = [
+  // [quoted phrase, sentence to scan, rule id, citation]
+  ['environmentally friendly', 'Our environmentally friendly bottle.', 'generic', 'Annex I, point 4a'],
+  ['eco-friendly', 'Our eco-friendly bottle.', 'generic', 'Annex I, point 4a'],
+  ['green', 'Our green bottle.', 'green', 'Annex I, point 4a'],
+  ['nature’s friend', 'A bottle that is nature’s friend.', 'generic', 'Annex I, point 4a'],
+  ['ecological', 'An ecological bottle.', 'generic', 'Annex I, point 4a'],
+  ['environmentally correct', 'An environmentally correct bottle.', 'generic', 'Annex I, point 4a'],
+  ['climate friendly', 'A climate friendly bottle.', 'generic', 'Annex I, point 4a'],
+  ['gentle on the environment', 'A wash that is gentle on the environment.', 'generic', 'Annex I, point 4a'],
+  ['carbon friendly', 'A carbon friendly bottle.', 'generic', 'Annex I, point 4a'],
+  ['energy efficient', 'An energy efficient bottle.', 'generic', 'Annex I, point 4a'],
+  ['biodegradable', 'A biodegradable wrap.', 'generic', 'Annex I, point 4a'],
+  ['biobased', 'A biobased bottle.', 'generic', 'Annex I, point 4a'],
+]
+
+const RECITAL_12 = [
+  ['climate neutral', 'This carton is climate neutral.', 'offset', 'Annex I, point 4c'],
+  ['CO2 neutral certified', 'This carton is CO2 neutral certified.', 'offset', 'Annex I, point 4c'],
+  ['carbon positive', 'This carton is carbon positive.', 'offset', 'Annex I, point 4c'],
+  ['climate net zero', 'This carton is climate net zero.', 'offset', 'Annex I, point 4c'],
+  ['climate compensated', 'This carton is climate compensated.', 'offset', 'Annex I, point 4c'],
+  ['reduced climate impact', 'A carton with reduced climate impact.', 'offset', 'Annex I, point 4c'],
+  ['limited CO2 footprint', 'A carton with a limited CO2 footprint.', 'offset', 'Annex I, point 4c'],
+]
+
+function conformance (recital, table, count) {
+  test(`every phrase Recital ${recital} quotes maps to its rule and citation`, () => {
+    equal(table.length, count, `Recital ${recital} quotes ${count} examples`)
+    for (const [quote, text, ruleId, citation] of table) {
+      assert(text.toLowerCase().includes(quote.toLowerCase()), `${quote} is not in the sample text`)
+      const fired = [...new Set(scan(text).map(hit => hit.ruleId))]
+      equal(fired.join('|'), ruleId, `${quote} produced ${fired.join('|') || 'no findings'}`)
+      equal(ruleById(ruleId).citation, citation, `${quote} cites the wrong article`)
+    }
+  })
+}
+
+conformance(9, RECITAL_9, 12)
+conformance(12, RECITAL_12, 7)
+
+// The same words in ordinary use, and specific claims the directive does not
+// blacklist, must stay quiet. ``green`` is only a claim when it is attached to a
+// product, so these catch an over-eager rule.
+const NOT_BANNED = [
+  ['green tea', 'Pairs well with green tea.'],
+  ['green beans', 'Pairs well with green beans.'],
+  ['greenhouse gas', 'We publish our greenhouse gas emissions.'],
+  ['green light', 'The project got the green light.'],
+  ['eco mode', 'Press eco mode to use less water.'],
+  ['ecosystem', 'Healthy soil needs a living ecosystem.'],
+  ['recycled aluminium', 'The body is recycled aluminium.'],
+]
+
+test('ordinary uses of the same words are not banned', () => {
+  for (const [term, text] of NOT_BANNED) {
+    equal(scan(text).length, 0, `${term} was flagged as ${ids(text).join('|')}`)
+  }
+})
+
 test('energy efficient is one of the named examples', () => {
   equal(ids('An energy efficient kettle.').join(), 'generic')
 })
@@ -226,10 +291,17 @@ test('the saved-page reader drops the same non-prose blocks as the browser walke
   assert(/carbon neutral/i.test(withHidden), 'aria-hidden text is visible, so it should be read')
 })
 
+test('markup between words does not glue them together', () => {
+  equal(textFromSavedPage('<p>Body is <b>recycled</b><br>aluminium.</p>'), 'Body is recycled aluminium.')
+  equal(textFromSavedPage('<p>Body is recycled<p>aluminium.</p>'), 'Body is recycled aluminium.')
+})
+
 test('a saved page decodes entities before scanning', () => {
   const found = ids(textFromSavedPage('<p>Our eco&nbsp;friendly bottle is carbon&#160;neutral.</p>'))
   assert(found.includes('generic'), 'eco friendly was not matched after decoding')
   assert(found.includes('offset'), 'carbon neutral was not matched after decoding')
+  const friend = ids(textFromSavedPage('<p>A bottle that is nature&rsquo;s friend.</p>'))
+  assert(friend.includes('generic'), 'the recital’s curly apostrophe was lost after decoding')
 })
 
 test('the corpus reads the demo card the same way the bookmarklet does', () => {
@@ -316,8 +388,6 @@ function stubDocument (nodes) {
 test('both readers implement one contract', () => {
   const dom = domText(stubDocument([]))
   const bytes = bytesText()
-  equal(dom.kind, 'dom')
-  equal(bytes.kind, 'bytes')
   equal(dom.text(null), '', 'a missing root reads as nothing')
   equal(bytes.text('<p>Body is recycled aluminium.</p>'), 'Body is recycled aluminium.')
 })

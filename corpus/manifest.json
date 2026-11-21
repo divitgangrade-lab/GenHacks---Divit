@@ -1,0 +1,167 @@
+{
+  "savedAt": "2026-11-21",
+  "scanner": "working tree",
+  "pages": [
+    {
+      "file": "001-allbirds-tree-runner.html",
+      "url": "https://www.allbirds.com/products/mens-tree-runner-nz-medium-grey",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 1294403,
+      "sha256": "24c0906a93ccc1e9dd7c89fe4166b00973a69d6d70792705091038a0b21298ad",
+      "title": "Men's Tree Runner NZ - Everyday Sneakers | Allbirds",
+      "words": 16863,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "002-allbirds-cruiser.html",
+      "url": "https://www.allbirds.com/products/mens-cruiser-medium-grey",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 1087769,
+      "sha256": "4563a57090c91d85b25933326438bcddc1c264fff1ccb8abfb7972203330a302",
+      "title": "Men’s Cruiser | Everyday Comfort &amp; Style | Allbirds",
+      "words": 15370,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "003-method-shampoo.html",
+      "url": "https://methodproducts.com/products/shampoo-simply-nourish-14-fl-oz",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 1430364,
+      "sha256": "59775d8d93310802751ccf106e27374aa57b75725294c26f8a0fd988fe0fc33a",
+      "title": "Simply Nourish Moisturizing Shampoo, 14 fl oz | method\n– method products",
+      "words": 1039,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "004-method-body-wash.html",
+      "url": "https://methodproducts.com/products/barrier-supporting-and-microbuffing-body-wash-tonic-bundle-34-fl-oz",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 1794015,
+      "sha256": "d4be6a718d8f29e25a7987368b11e3d67977a16052588bad835267cfb06e5e34",
+      "title": "soft radiance barrier supporting + micro buffing body wash tonic bundl\n– method products",
+      "words": 1861,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "005-weleda-skin-food.html",
+      "url": "https://www.weleda.com/product/skin-food-original-ultra-rich-cream-g009398",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 643644,
+      "sha256": "f652c61a039cb97e72520c7c738f1cbc67fbd7858c53c5cb61da5ae9be0325d9",
+      "title": "Weleda Skin Food Original – Intensive Care for Dry Skin - Weleda",
+      "words": 1078,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "006-weleda-skin-food-light.html",
+      "url": "https://www.weleda.com/product/skin-food-light-nourishing-cream-g007756",
+      "role": "shop",
+      "region": "US",
+      "savedAt": "2026-11-21",
+      "bytes": 618823,
+      "sha256": "72b034afc033333c545daf96cf0d026a653236e6b86eb0e764339c1800f8ff84",
+      "title": "Weleda Skin Food Light – Daily Moisturizer for Dry Skin - Weleda",
+      "words": 905,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "007-armedangels-jeans.html",
+      "url": "https://www.armedangels.com/en-eu/products/baarly-high-waist-barrel-jeans-fluid-ink",
+      "role": "shop",
+      "region": "EU",
+      "savedAt": "2026-11-21",
+      "bytes": 1495477,
+      "sha256": "52b0cafbaee1aa90b3643471884b2562c191999d8b2636800992c6befe1432f2",
+      "title": "BAARLY HIGH WAIST BARREL JEAN for women in blue",
+      "words": 2849,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "008-armedangels-knit.html",
+      "url": "https://www.armedangels.com/en-eu/products/ripp-stricktroyer-honey-melange",
+      "role": "shop",
+      "region": "EU",
+      "savedAt": "2026-11-21",
+      "bytes": 1235382,
+      "sha256": "189351819a779a1d9654866afd83f012fdb3904c7f694b3fc383586609b199ac",
+      "title": "RIB KNITTED TROYER for women in beige",
+      "words": 1736,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "009-organicbasics-hoodie.html",
+      "url": "https://organicbasics.com/products/womens-weekend-crop-hoodie-misty-grey-melange",
+      "role": "shop",
+      "region": "EU",
+      "savedAt": "2026-11-21",
+      "bytes": 2120703,
+      "sha256": "c34ec4f9a0acf6c1ffdb9b7289435b77e4435e4d826a07054ae0b703488cb988",
+      "title": "Weekend Crop Hoodie - Misty Grey Melange | Organic Basics",
+      "words": 3264,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "010-organicbasics-cardigan.html",
+      "url": "https://organicbasics.com/products/soft-knit-rib-cardigan-black",
+      "role": "shop",
+      "region": "EU",
+      "savedAt": "2026-11-21",
+      "bytes": 2131481,
+      "sha256": "ad98cc96d3c352289271e34dce223b551315be4d13186b92e01c97fb400c0650",
+      "title": "soft-knit-rib-cardigan",
+      "words": 3264,
+      "review": "product page, no pre-screening"
+    },
+    {
+      "file": "011-ecover-tablets.html",
+      "url": "https://uk.ecover.com/products/dishwashing/wrapper-free-all-in-one-dishwasher-tablets/",
+      "role": "certified",
+      "region": "UK",
+      "savedAt": "2026-11-21",
+      "bytes": 116869,
+      "sha256": "18757ef81e0e077ee59fdbf37d44cadc3c3326f76dd0646df3a7a05906845e1d",
+      "title": "Wrapper Free | All in One Dishwasher Tablets | Ecover",
+      "words": 651,
+      "review": "EU Ecolabel product page, kept as a false-positive control"
+    },
+    {
+      "file": "012-ecover-zero-tablets.html",
+      "url": "https://uk.ecover.com/products/dishwashing/wrapper-free-all-in-one-zero-dishwasher-tablets/",
+      "role": "certified",
+      "region": "UK",
+      "savedAt": "2026-11-21",
+      "bytes": 276669,
+      "sha256": "3aec2c64b21d56e905498e0d6b1134cf0dcbf6aacf1aa9271efd9c414c644e83",
+      "title": "Wrapper Free | All in One Dishwasher Tablets | Ecover",
+      "words": 1434,
+      "review": "EU Ecolabel product page, kept as a false-positive control"
+    },
+    {
+      "file": "013-ecover-power-tablets.html",
+      "url": "https://uk.ecover.com/products/dishwashing/wrapper-free-all-in-one-power-dishwasher-tablets/",
+      "role": "certified",
+      "region": "UK",
+      "savedAt": "2026-11-21",
+      "bytes": 281372,
+      "sha256": "b2e8046eddca723222869691b4181c7ca933d90b873d6459fb6e8f956f759135",
+      "title": "Wrapper Free | All in One POWER Dishwasher Tablets | Ecover",
+      "words": 1427,
+      "review": "EU Ecolabel product page, kept as a false-positive control"
+    }
+  ],
+  "sample": {
+    "shop": 10,
+    "certified": 3,
+    "note": "Fixed before scanning. Unreachable shops were replaced before any page was read by the scanner."
+  }
+}

@@ -10,7 +10,7 @@ export const MIN_WORDS = 30
 // A file with a handful of words is a consent wall or a failed save, not a
 // product page. Counting it as clean would flatter the hit rate, so it is
 // reported separately instead.
-export function countWords (text) {
+function countWords (text) {
   return text.split(/\s+/).filter(Boolean).length
 }
 
