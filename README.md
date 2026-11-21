@@ -25,7 +25,7 @@ report.js      bookmarklet entry: reads the page, renders the panel in a shadow 
 app.js         the demo page, and its own renderer
 showroom/      the 50-component React Bits showroom (Vite + React, its own deps)
 motion/        the showroom's built output, committed for GitHub Pages
-tests/run.mjs  42 assertions against the scanner, page text and the corpus script
+tests/run.mjs  45 assertions against the scanner, page text and the corpus script
 scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
@@ -56,7 +56,7 @@ The motion showroom is the exception. It is a Vite + React app in `showroom/` wi
 ```bash
 npm install              # once, for the showroom only
 npm run build:showroom   # writes motion/
-npm test          # 42 assertions, no dependencies needed
+npm test          # 45 assertions, no dependencies needed
 npm run serve            # http://localhost:3000
 npm run corpus           # hit rate over saved pages, see below
 ```

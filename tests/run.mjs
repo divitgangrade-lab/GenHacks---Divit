@@ -186,6 +186,32 @@ test('a data-scan-skip region goes whole, however deeply nested', () => {
   assert(text.includes('ten years'), 'the text after the region was lost')
 })
 
+test('nested data-scan-skip regions end at the outer close tag', () => {
+  const html = '<body><div data-scan-skip><div data-scan-skip>eco-friendly</div>carbon neutral</div><p>Body is recycled aluminium.</p></body>'
+  const text = textFromSavedPage(html)
+  assert(!/carbon neutral/i.test(text), 'text after the inner region leaked out')
+  assert(/recycled aluminium/.test(text), 'the rest of the page was lost')
+})
+
+test('a save that ends inside a skipped region drops the tail', () => {
+  const text = textFromSavedPage('<body><p>Body is recycled aluminium.</p><div data-scan-skip><p>eco-friendly')
+  assert(/recycled aluminium/.test(text), 'the text before the region was lost')
+  assert(!/eco-friendly/i.test(text), 'text after an unclosed region survived')
+})
+
+test('a trailing slash closes void elements and svg, not html elements', () => {
+  const div = textFromSavedPage('<body><div data-scan-skip/>eco-friendly</div><p>recycled aluminium</p></body>')
+  assert(!/eco-friendly/i.test(div), 'a slash closed an html element the browser keeps open')
+  assert(/recycled aluminium/.test(div))
+
+  const svg = textFromSavedPage('<body><svg data-scan-skip/>eco-friendly bottle<p>recycled aluminium</p></body>')
+  assert(/eco-friendly bottle/.test(svg), 'a self-closed svg swallowed the rest of the page')
+  assert(/recycled aluminium/.test(svg))
+
+  const img = textFromSavedPage('<body><img data-scan-skip src="x.png">eco-friendly bottle</body>')
+  assert(/eco-friendly bottle/.test(img), 'a marked void element swallowed the page')
+})
+
 test('the saved-page reader drops the same non-prose blocks as the browser walker', () => {
   for (const tag of ['script', 'style', 'noscript', 'template', 'svg', 'iframe']) {
     const text = textFromSavedPage(`<body><${tag}>eco-friendly bottle</${tag}><p>Body is recycled aluminium.</p></body>`)

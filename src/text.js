@@ -26,7 +26,7 @@ export const SKIP_SELECTOR = [
 ].join(', ')
 
 const ATTRIBUTE_MATCHERS = SKIP_ATTRIBUTES.map(
-  attribute => new RegExp(`(?:^|\\s)${attribute}(?:\\s|=|$)`, 'i')
+  attribute => new RegExp(`(?:^|\\s)${attribute}(?:\\s|=|/|$)`, 'i')
 )
 const ID_MATCHERS = SKIP_IDS.map(
   id => new RegExp(`(?:^|\\s)id\\s*=\\s*["']?${id}\\b`, 'i')
@@ -43,6 +43,13 @@ export function isSkippedElement (name, attrs) {
 }
 
 const VOID_ELEMENTS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
+
+// Browsers ignore a trailing slash on an HTML element — <div/> opens a div —
+// but honour it on <svg/>, which is foreign content. Getting this wrong makes
+// the byte reader show text the live DOM hides, or hide text it shows.
+function closesItself (name, attrs) {
+  return VOID_ELEMENTS.has(name) || (name === 'svg' && /\/\s*$/.test(attrs))
+}
 
 const ENTITIES = {
   amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
@@ -69,7 +76,7 @@ function decodeEntities (text) {
 // Node test run, where there is no browser global to lean on.
 const SHOW_TEXT = 4
 
-export function readableText (doc, root) {
+function readableText (doc, root) {
   // Not dead code: a bookmarklet injected before a body exists would otherwise
   // throw here and leave the reader with nothing at all.
   if (!root) return ''
@@ -78,7 +85,7 @@ export function readableText (doc, root) {
   let node
   while ((node = walker.nextNode()) !== null) {
     if (!node.nodeValue.trim()) continue
-    if (node.parentElement.closest(SKIP_SELECTOR)) continue
+    if (node.parentElement?.closest(SKIP_SELECTOR)) continue
     parts.push(node.nodeValue)
   }
   return parts.join(' ')
@@ -87,37 +94,45 @@ export function readableText (doc, root) {
 // The byte reader has no DOM to ask, so it has to find the end of a skipped
 // element itself. Depth counting is what keeps a nested div inside a marked div
 // from ending the region at the inner close tag.
+//
+// One thing this cannot match: HTML closes <p>, <li> and table cells at the
+// next sibling, so a hand-broken save that leaves one open reads differently in
+// a browser. A page saved by a browser already carries the closing tags, so the
+// corpus does not meet that shape.
 function dropSkipped (html) {
   const tag = /<(\/?)([a-z][a-z0-9:-]*)\b([^>]*)>/gi
   let out = ''
   let last = 0
+  let skip = ''
   let depth = 0
-  let skipped = ''
   let match
 
   while ((match = tag.exec(html)) !== null) {
     const [, closing, rawName, attrs] = match
     const name = rawName.toLowerCase()
 
-    if (depth > 0) {
-      if (name !== skipped) continue
-      if (closing) depth -= 1
-      else if (!VOID_ELEMENTS.has(name) && !/\/\s*$/.test(attrs)) depth += 1
-      if (depth === 0) last = tag.lastIndex
+    if (!skip) {
+      if (closing || !isSkippedElement(name, attrs)) continue
+      out += html.slice(last, match.index) + ' '
+      last = tag.lastIndex
+      if (closesItself(name, attrs)) continue
+      skip = name
+      depth = 1
       continue
     }
 
-    if (closing || !isSkippedElement(name, attrs)) continue
-    out += html.slice(last, match.index) + ' '
-    last = tag.lastIndex
-    if (VOID_ELEMENTS.has(name) || /\/\s*$/.test(attrs)) continue
-    depth = 1
-    skipped = name
+    if (name !== skip) continue
+    depth += closing ? -1 : (closesItself(name, attrs) ? 0 : 1)
+    if (depth === 0) {
+      skip = ''
+      last = tag.lastIndex
+    }
   }
 
-  // A half-saved file can end inside <script> or <svg>. Everything after that
-  // opening tag is inside the region, so it goes too.
-  return depth > 0 ? out : out + html.slice(last)
+  // A save can stop inside a skipped element. Everything after that opening tag
+  // is inside the region, so it goes too — the browser closes it at the end of
+  // the document for the same reason.
+  return skip ? out : out + html.slice(last)
 }
 
 // Visible text from saved bytes: what a reader sees, not the markup around it.
