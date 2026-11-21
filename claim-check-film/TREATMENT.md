@@ -4,7 +4,7 @@
 
 **Style.** Halftone Dossier (Lemo-Opuscar): cream archive paper, one ink, halftone dots for tone, heavy serif headlines, rubber stamps that slam, dot-wipe cuts. Every printed surface is drawn in code; the only photographs are screenshots of our own running product.
 
-**Length.** 116.0 s, 3840×2160, 30 fps, −14 LUFS.
+**Length.** 117.1 s, 3840×2160 and 1920×1080, 30 fps, −14 LUFS. Delivered as two files: the 4K master and a 1080p copy for upload and preview.
 
 ## Three structures considered
 
@@ -23,7 +23,7 @@ Why 3 wins: it is the only structure where the product's output *is* the story, 
 
 - **Setup (0–30 s):** a sentence on paper, a stamp, the date the rule applies, the three words the directive names first.
 - **Turn (30–77 s):** the page itself; one finding opened into its three parts; six rules; the decoy that proves it is not a keyword grep; the install.
-- **Ending (77–116 s):** the privacy promise, the dated run with its limits stated, what it will not do, and the end card — "A check, not a rewrite."
+- **Ending (78–117 s):** the privacy promise, the dated run with its limits stated, what it will not do, and the end card — "A check, not a rewrite."
 
 The opening sentence returns as the case number in the HUD on every frame, so the film never leaves the file.
 

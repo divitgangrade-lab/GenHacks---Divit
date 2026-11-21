@@ -73,6 +73,42 @@ function halftone(x, y, w, h, step, angle, density, color, alpha = 1) {
   ctx.restore();
 }
 
+function roundRectPath(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r);
+  g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r);
+  g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
+  g.closePath();
+}
+
+/* dots that dissolve into the paper: no clip, no edge — each dot carries its own fade */
+function halftoneSoft(x, y, w, h, step, angle, density, color, alpha = 1, o = {}) {
+  const { core = 0.34, edge = 1.02 } = o;
+  const a = (angle * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const cx = x + w / 2, cy = y + h / 2;
+  const rx = (w / 2) * edge, ry = (h / 2) * edge;
+  const R = Math.hypot(w, h) / 2 + step;
+  ctx.save();
+  ctx.fillStyle = color;
+  for (let j = -R; j < R; j += step) {
+    for (let i = -R; i < R; i += step) {
+      const px = cx + i * ca - j * sa, py = cy + i * sa + j * ca;
+      const d = Math.hypot((px - cx) / rx, (py - cy) / ry);   // 0 centre, 1 at the ring
+      if (d >= 1) continue;
+      const fall = ss(clamp((1 - d) / (1 - core)));
+      const den = density(px, py) * fall;
+      if (den <= 0.02) continue;
+      const r = Math.min(step * 0.66, den * step * 0.62);
+      if (r < 0.25) continue;
+      ctx.globalAlpha = alpha * clamp(fall * 1.2);
+      ctx.beginPath(); ctx.arc(px, py, r, 0, 6.2832); ctx.fill();
+    }
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
+
 function edgeDensity(px, py) {
   const dx = Math.min(px, W - px) / W, dy = Math.min(py, H - py) / H;
   const d = Math.min(dx, dy);
@@ -265,7 +301,7 @@ S.hook = (u) => {
 // 02 — title
 S.title = (u) => {
   const p = seg(u, 0.15, 0.85);
-  halftone(1180, 120, 760, 900, 22, 22, (px, py) => clamp(1 - Math.hypot(px - 1560, py - 540) / 640) * 1.2, RED, 0.32);
+  halftoneSoft(1120, 60, 880, 1010, 24, 22, (px, py) => clamp(1 - Math.hypot(px - 1560, py - 540) / 640) * 0.92, RED, 0.34, { core: 0.30, edge: 1.04 });
   const chars = 'CLAIM CHECK'.split('');
   let x = M;
   ctx.save();
@@ -323,8 +359,13 @@ S.law = (u) => {
     if (q <= 0) return;
     const y = 320 + i * 170, x = 1040 + (1 - eo(q)) * 26;
     ctx.globalAlpha = q;
-    ctx.strokeStyle = RED; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.moveTo(x, y - 30); ctx.lineTo(x + 34, y + 6); ctx.lineTo(x + 62, y - 56); ctx.stroke();
+    const arm1 = clamp(q / 0.42), arm2 = clamp((q - 0.42) / 0.58);
+    ctx.save();
+    ctx.strokeStyle = RED; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(x, y - 4);
+    if (arm1 > 0) ctx.lineTo(x + 30 * arm1, y + 24 * arm1);
+    if (arm2 > 0) ctx.lineTo(x + 30 + 66 * arm2, y + 24 - 80 * arm2);
+    ctx.stroke(); ctx.restore();
     txt(a, x + 92, y, { size: 44, weight: 700, family: 'Inter' });
     label(b.toUpperCase(), x + 92, y + 34);
     ctx.globalAlpha = 1;
@@ -544,15 +585,22 @@ S.install = (u) => {
     ctx.setLineDash([]);
   }
   // the panel, as evidence
-  const px = 1180, py = 200;
-  const pw = 240, ph = pw * (imgs.panel.height / imgs.panel.width);
-  card(px - 14, py - 14, pw + 28, ph + 28, { fill: 'rgba(255,252,242,0.9)' });
+  const px = 1240, py = 196;
+  const sw = imgs.panel.width, cropH = 1560;
+  const pw = 452, ph = pw * (cropH / sw);
+  card(px - 16, py - 16, pw + 32, ph + 32, { fill: 'rgba(255,252,242,0.92)' });
   ctx.save();
-  ctx.filter = 'grayscale(0.2) contrast(1.02) brightness(1.0)';
-  // the panel is drawn at its own proportions, never squashed
-  ctx.drawImage(imgs.panel, px, py, pw, ph);
+  ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip();
+  // an excerpt at 40% of the capture, not the whole panel squeezed to a stamp
+  ctx.filter = 'grayscale(0.12) contrast(1.06) brightness(1.02)';
+  ctx.drawImage(imgs.panel, 0, 0, sw, cropH, px, py, pw, ph);
+  ctx.filter = 'none';
+  const fg = ctx.createLinearGradient(0, py + ph - 130, 0, py + ph);
+  fg.addColorStop(0, 'rgba(252,247,235,0)'); fg.addColorStop(1, 'rgba(252,247,235,0.95)');
+  ctx.fillStyle = fg; ctx.fillRect(px, py + ph - 130, pw, 130);
   ctx.restore();
-  label('THE PANEL, ON THIS PAGE', px, py + ph + 56);
+  label('THE PANEL, ON THIS PAGE', px, py + ph + 54);
+  label('EXCERPT · THE LIST CONTINUES', px, py + ph + 78, { size: 13 });
   italicFill('The panel opens on the page,', M + 40, 566, 34, MUT);
   italicFill('with every finding in it.', M + 40, 608, 34, MUT);
   const rq = seg(u, 3.2, 3.7);

@@ -8,9 +8,9 @@
    "cap": "This sentence is on a product page. In the EU, it is now banned — unless the seller can prove the claim.",
    "capKey": "banned",
    "t": 0,
-   "dur": 9.798,
+   "dur": 9.988999999999999,
    "voiceAt": 0.5,
-   "voiceEnd": 8.448
+   "voiceEnd": 8.639
   },
   {
    "id": "title",
@@ -19,10 +19,10 @@
    "extra": 0.2,
    "cap": "Claim Check marks the claims that are now illegal, on the page you are shopping on.",
    "capKey": "illegal",
-   "t": 9.798,
-   "dur": 7.08,
-   "voiceAt": 10.398,
-   "voiceEnd": 15.878
+   "t": 9.988999999999999,
+   "dur": 7.0489999999999995,
+   "voiceAt": 10.588999999999999,
+   "voiceEnd": 16.037999999999997
   },
   {
    "id": "law",
@@ -31,10 +31,10 @@
    "extra": 0.35,
    "cap": "Directive 2024/825 applies from 27 September 2026. It covers stock already on the shelves.",
    "capKey": "27 September 2026",
-   "t": 16.878,
-   "dur": 13.398,
-   "voiceAt": 17.428,
-   "voiceEnd": 29.076
+   "t": 17.037999999999997,
+   "dur": 13.786,
+   "voiceAt": 17.587999999999997,
+   "voiceEnd": 29.623999999999995
   },
   {
    "id": "three",
@@ -43,10 +43,10 @@
    "extra": 0.4,
    "cap": "Eco-friendly. Climate neutral. Biodegradable. Without proof, the words are the problem.",
    "capKey": "Biodegradable",
-   "t": 30.276,
-   "dur": 11.199,
-   "voiceAt": 30.826,
-   "voiceEnd": 40.225
+   "t": 30.823999999999998,
+   "dur": 11.865,
+   "voiceAt": 31.374,
+   "voiceEnd": 41.439
   },
   {
    "id": "product",
@@ -55,10 +55,10 @@
    "extra": 0.35,
    "cap": "It reads the visible text of the page: four banned claims here, two that need evidence.",
    "capKey": "four banned claims",
-   "t": 41.475,
-   "dur": 10.219,
-   "voiceAt": 42.025,
-   "voiceEnd": 50.494
+   "t": 42.689,
+   "dur": 10.047,
+   "voiceAt": 43.239,
+   "voiceEnd": 51.536
   },
   {
    "id": "anatomy",
@@ -67,10 +67,10 @@
    "extra": 0.35,
    "cap": "Each finding quotes the sentence, marks the phrase, and names the article.",
    "capKey": "marks the phrase",
-   "t": 51.694,
-   "dur": 9.85,
-   "voiceAt": 52.244,
-   "voiceEnd": 60.344
+   "t": 52.736000000000004,
+   "dur": 9.964,
+   "voiceAt": 53.286,
+   "voiceEnd": 61.5
   },
   {
    "id": "rules",
@@ -79,10 +79,10 @@
    "extra": 1.35,
    "cap": "Six rules. Four banned practices, and two that need evidence.",
    "capKey": "Six rules",
-   "t": 61.544000000000004,
-   "dur": 7.148,
-   "voiceAt": 62.094,
-   "voiceEnd": 66.492
+   "t": 62.7,
+   "dur": 7.321,
+   "voiceAt": 63.25,
+   "voiceEnd": 67.821
   },
   {
    "id": "decoy",
@@ -91,10 +91,10 @@
    "extra": 0.8,
    "cap": "It stays quiet when the words are ordinary. Green tea is not a green claim.",
    "capKey": "Green tea",
-   "t": 68.69200000000001,
-   "dur": 7.8839999999999995,
-   "voiceAt": 69.242,
-   "voiceEnd": 74.926
+   "t": 70.021,
+   "dur": 7.574999999999999,
+   "voiceAt": 70.571,
+   "voiceEnd": 75.946
   },
   {
    "id": "install",
@@ -103,10 +103,10 @@
    "extra": 0.55,
    "cap": "One bookmark, any product page. No account, no extension.",
    "capKey": "One bookmark",
-   "t": 76.57600000000001,
-   "dur": 6.257,
-   "voiceAt": 77.126,
-   "voiceEnd": 81.433
+   "t": 77.596,
+   "dur": 6.3759999999999994,
+   "voiceAt": 78.146,
+   "voiceEnd": 82.572
   },
   {
    "id": "privacy",
@@ -115,10 +115,10 @@
    "extra": 0.45,
    "cap": "The page text never leaves the browser. That is what makes it safe on a checkout page.",
    "capKey": "never leaves the browser",
-   "t": 82.83300000000001,
-   "dur": 7.826,
-   "voiceAt": 83.38300000000001,
-   "voiceEnd": 89.35900000000001
+   "t": 83.97200000000001,
+   "dur": 7.68,
+   "voiceAt": 84.522,
+   "voiceEnd": 90.352
   },
   {
    "id": "receipts",
@@ -127,10 +127,10 @@
    "extra": 0.45,
    "cap": "Thirteen saved pages. Three findings, all reviewed. A pilot, not a survey.",
    "capKey": "Three findings",
-   "t": 90.659,
-   "dur": 8.904,
-   "voiceAt": 91.209,
-   "voiceEnd": 98.263
+   "t": 91.65200000000002,
+   "dur": 9.263,
+   "voiceAt": 92.20200000000001,
+   "voiceEnd": 99.61500000000001
   },
   {
    "id": "limits",
@@ -139,10 +139,10 @@
    "extra": 0.55,
    "cap": "It cannot see images, it does not judge the product, and it reads English only.",
    "capKey": "images",
-   "t": 99.563,
-   "dur": 7.393999999999999,
-   "voiceAt": 100.113,
-   "voiceEnd": 105.557
+   "t": 100.91500000000002,
+   "dur": 7.166999999999999,
+   "voiceAt": 101.46500000000002,
+   "voiceEnd": 106.68200000000002
   },
   {
    "id": "end",
@@ -151,25 +151,25 @@
    "extra": 2.9,
    "cap": "The directive already names the words. Claim Check shows you where they are.",
    "capKey": "where they are",
-   "t": 106.95700000000001,
-   "dur": 9.038,
-   "voiceAt": 107.60700000000001,
-   "voiceEnd": 112.34500000000001
+   "t": 108.08200000000002,
+   "dur": 8.984,
+   "voiceAt": 108.73200000000003,
+   "voiceEnd": 113.41600000000003
   }
  ],
- "dur": 115.995,
+ "dur": 117.066,
  "cuts": [
-  9.798,
-  16.878,
-  30.276,
-  41.475,
-  51.694,
-  61.544000000000004,
-  68.69200000000001,
-  76.57600000000001,
-  82.83300000000001,
-  90.659,
-  99.563,
-  106.95700000000001
+  9.988999999999999,
+  17.037999999999997,
+  30.823999999999998,
+  42.689,
+  52.736000000000004,
+  62.7,
+  70.021,
+  77.596,
+  83.97200000000001,
+  91.65200000000002,
+  100.91500000000002,
+  108.08200000000002
  ]
 }

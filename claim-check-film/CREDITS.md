@@ -14,7 +14,7 @@ The three files are self-hosted in `fonts/` and loaded from disk; the film makes
 
 ## Voice
 
-Kokoro-82M (`kokoro-v1.0.onnx`, `voices-v1.0.bin`), voice `bm_george`, run locally by the library's `core/tts/tts.py`.
+Kokoro-82M (`kokoro-v1.0.onnx`, `voices-v1.0.bin`), voice `bm_fable` at speed 0.80, run locally by the library's `core/tts/tts.py`. The take is then processed in `mix.py` (presence, consonant bite, saturation, parallel compression, phrase-level contrast); no word is altered.
 Model and voices: hexgrad, Apache License 2.0; ONNX export by Taylor Chu (thewh1teagle/kokoro-onnx). The narration is synthetic speech generated for this film; no human recording is used.
 
 ## Music and sound effects

@@ -430,7 +430,7 @@ corpus/pages/
 
 # The film master and its render parts are build output
 claim-check-film/out/
-claim-check-film/claim-check.mp4
+claim-check-film/claim-check*.mp4
 claim-check-film/raw/
 .tools/
 .lemo-setup.sh

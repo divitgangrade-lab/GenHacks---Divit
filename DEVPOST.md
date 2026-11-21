@@ -122,9 +122,16 @@ Four images, all 1536×1024 (exactly 3:2, under 5 MB), captured from the live Pa
 
 ## Video demo link
 
-**Rendered, not yet uploaded.** `claim-check-film/claim-check.mp4` — 1:56, 3840×2160, 30 fps, −13.9 LUFS, 152 MB. Poster: `claim-check-film/poster.jpg`. Sidecar captions: `claim-check-film/subtitles_en.srt` (the same lines are burned into the picture).
+**Rendered, not yet uploaded.** Two files, same cut:
 
-Devpost embeds a YouTube or Vimeo URL, so this file still has to be uploaded from your account and its URL pasted into the field. Upload `claim-check.mp4` as-is — no re-encode needed — and use:
+| File | Size | Use |
+|---|---|---|
+| `claim-check-film/claim-check.mp4` | 3840×2160, 30 fps, 129 MB | upload this one to YouTube — it keeps the 4K stream |
+| `claim-check-film/claim-check-1080p.mp4` | 1920×1080, 30 fps, 70 MB | quick previews, and the fallback if a player or a slow link struggles with 4K |
+
+Both are 1:57, H.264 High with AAC-LC audio, standard limited-range BT.709 — the format every player takes. Poster: `claim-check-film/poster.jpg`. Sidecar captions: `claim-check-film/subtitles_en.srt` (the same lines are burned into the picture).
+
+Devpost embeds a YouTube or Vimeo URL, so the file still has to be uploaded from your account and its URL pasted into the field. Title to use:
 
 > Claim Check — the claim, the sentence, the article (GenHacks 2026)
 

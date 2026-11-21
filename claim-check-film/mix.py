@@ -2,6 +2,7 @@
 import json, math, os
 import numpy as np
 import soundfile as sf
+from scipy.signal import butter, sosfilt, lfilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SR = 48000
@@ -66,6 +67,46 @@ def lowpass(x, k=0.18):
         acc += k * (x[i] - acc)
         y[i] = acc
     return y
+
+
+def highpass(x, f=85):
+    sos = butter(2, min(0.99, f / (SR / 2)), 'high', output='sos')
+    return sosfilt(sos, x).astype(np.float32)
+
+
+def peaking(x, f, gain_db, q=1.0):
+    A = 10 ** (gain_db / 40.0)
+    w = 2 * np.pi * f / SR
+    al = np.sin(w) / (2 * q); cw = np.cos(w)
+    return lfilter([1 + al * A, -2 * cw, 1 - al * A],
+                   [1 + al / A, -2 * cw, 1 - al / A], x).astype(np.float32)
+
+
+def comp(x, thr=0.22, ratio=4.5):
+    a = np.abs(x)
+    out = np.where(a > thr, thr + (a - thr) / ratio, a)
+    return np.sign(x).astype(np.float32) * out.astype(np.float32)
+
+
+def voice_chain(x):
+    """The take, made to lean on its stressed words.
+
+    Presence and consonant bite for emphasis, a little saturation so the voice
+    reads loud before the limiter, and a parallel compressor under it for
+    density. Nothing here changes a word.
+    """
+    x = highpass(x, 80)
+    x = peaking(x, 2100, 2.4, 0.9)
+    x = peaking(x, 4800, 1.8, 1.1)
+    d = np.diff(x, prepend=x[0])
+    x = x + 0.30 * highpass(d, 2200)          # stops and sibilants land
+    x = (np.tanh(x * 1.7) / 1.7).astype(np.float32)
+    x = (0.62 * x + 0.60 * comp(x)).astype(np.float32)
+    win = int(0.04 * SR)                       # phrase-level contrast
+    env = np.sqrt(np.convolve(x * x, np.ones(win) / win, mode='same') + 1e-12)
+    ref = np.percentile(env, 70) + 1e-9
+    x = x * np.clip((env / ref) ** 0.15, 0.80, 1.30)
+    return (x / (np.max(np.abs(x)) + 1e-6) * 0.95).astype(np.float32)
 
 
 # ── the score ───────────────────────────────────────────────────────────────
@@ -243,12 +284,8 @@ for s in TL['scenes']:
     if sr != SR:
         idx = np.linspace(0, len(x) - 1, int(len(x) * SR / sr))
         x = np.interp(idx, np.arange(len(x)), x).astype(np.float32)
-    # gentle compression: TTS has a high peak-to-average ratio
-    a = np.abs(x)
-    thr = np.percentile(a, 78) + 1e-6
-    x = np.sign(x) * np.where(a > thr, thr + (a - thr) / 3.2, a)
-    x = x / (np.max(np.abs(x)) + 1e-6) * 0.92
-    add(voice, x, s['voiceAt'], 1.0)
+    x = voice_chain(x)
+    add(voice, x, s['voiceAt'], 1.15)
 
 
 # ── a modest room for the voice so it sits in the same space ────────────────

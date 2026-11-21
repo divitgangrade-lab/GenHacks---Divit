@@ -1,6 +1,6 @@
 #!/bin/sh
 # Claim Check — one command builds the film.
-#   LIB=/path/to/lemo-opuscar sh build.sh [WxH] [fps]
+#   LIB=/path/to/lemo-opuscar sh build.sh [4K WxH] [fps]   # also writes a 1080p copy
 # Needs Node 20+, ffmpeg 7+ on PATH, and the library's core + voice tiers installed.
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -18,25 +18,19 @@ node -e "import('./timeline.js').then(m=>require('fs').writeFileSync('timeline.j
 # sound first: it is cheap, and a broken mix should not wait on a 4K render
 "$LIB/.venv/bin/python" mix.py
 
-# picture, in three parts: each part is a checkpoint on a slow machine
-node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$SIZE" --q 't0=0&t1=40'   --out "$HERE/out/part1.mp4"
-node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$SIZE" --q 't0=40&t1=80'  --out "$HERE/out/part2.mp4"
-node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$SIZE" --q 't0=80&t1=116' --out "$HERE/out/part3.mp4"
+# picture, in three parts per size: each part is a checkpoint on a slow machine
+DUR=$(node --input-type=module -e "import('./timeline.js').then(m=>console.log(m.DUR.toFixed(2)))")
+mkdir -p "$HERE/out/1080"
+for d in out out/1080; do
+  s=$SIZE; [ "$d" = "out/1080" ] && s=1920x1080
+  node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$s" --q "t0=0&t1=40"          --out "$HERE/$d/part1.mp4"
+  node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$s" --q "t0=40&t1=80"         --out "$HERE/$d/part2.mp4"
+  node "$LIB/core/render/video.mjs" "$HERE" --fps "$FPS" --workers 2 --size "$s" --q "t0=80&t1=$DUR"       --out "$HERE/$d/part3.mp4"
+done
 
-printf "file '%s'\n" "$HERE/out/part1.mp4" "$HERE/out/part2.mp4" "$HERE/out/part3.mp4" > "$HERE/out/parts.txt"
-ffmpeg -y -loglevel error -f concat -safe 0 -i "$HERE/out/parts.txt" -c copy "$HERE/out/video.mp4"
-
-# master: two-pass loudnorm to -14 LUFS / -1.2 dBTP, AAC 256k
-JSON=$(ffmpeg -hide_banner -nostats -i "$HERE/out/mix.wav" -af loudnorm=I=-14:TP=-1.2:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
-M_I=$(echo "$JSON" | sed -n 's/.*"input_i" : "\(.*\)",/\1/p')
-M_LRA=$(echo "$JSON" | sed -n 's/.*"input_lra" : "\(.*\)",/\1/p')
-M_TP=$(echo "$JSON" | sed -n 's/.*"input_tp" : "\(.*\)",/\1/p')
-M_TH=$(echo "$JSON" | sed -n 's/.*"input_thresh" : "\(.*\)",/\1/p')
-M_OFF=$(echo "$JSON" | sed -n 's/.*"target_offset" : "\(.*\)",/\1/p')
-ffmpeg -y -loglevel error -i "$HERE/out/video.mp4" -i "$HERE/out/mix.wav" \
-  -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k -ar 48000 \
-  -af "loudnorm=I=-14:TP=-1.2:LRA=11:measured_I=$M_I:measured_LRA=$M_LRA:measured_TP=$M_TP:measured_thresh=$M_TH:offset=$M_OFF:linear=true" \
-  -movflags +faststart -shortest "$HERE/claim-check.mp4"
+# master both: two-pass loudnorm to -14 LUFS / -1.2 dBTP, yuv420p BT.709, faststart
+"$LIB/.venv/bin/python" master.py --dir out      --out claim-check.mp4       --crf 22 --level 5.1
+"$LIB/.venv/bin/python" master.py --dir out/1080 --out claim-check-1080p.mp4 --crf 20 --level 4.1
 
 # the poster: the film's signature frame
 node "$LIB/core/render/still.mjs" "$HERE" 3.4 --size "$SIZE" --out "$HERE/out/poster" >/dev/null
@@ -44,4 +38,4 @@ cp "$HERE/out/poster/t_3.4.jpg" "$HERE/poster.jpg"
 
 # the burned-in captions, also as a sidecar (players prefer it over the picture)
 "$LIB/.venv/bin/python" make_srt.py
-echo "done: $HERE/claim-check.mp4"
+echo "done: $HERE/claim-check.mp4 and $HERE/claim-check-1080p.mp4"

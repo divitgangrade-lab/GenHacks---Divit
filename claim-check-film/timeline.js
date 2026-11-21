@@ -1,8 +1,8 @@
 // One timeline for picture, voice, captions and the score.
 // Scene length = head + the measured voice line + tail + any extra hold.
 export const VDUR = {
-  v01: 7.948, v02: 5.480, v03: 11.648, v04: 9.399, v05: 8.469, v06: 8.100,
-  v07: 4.398, v08: 5.684, v09: 4.307, v10: 5.976, v11: 7.054, v12: 5.444, v13: 4.738,
+  v01: 8.139, v02: 5.449, v03: 12.036, v04: 10.065, v05: 8.297, v06: 8.214,
+  v07: 4.571, v08: 5.375, v09: 4.426, v10: 5.83, v11: 7.413, v12: 5.217, v13: 4.684,
 };
 
 const HEAD = 0.55, TAIL = 0.85;

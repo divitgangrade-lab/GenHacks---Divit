@@ -1,51 +1,51 @@
 1
-00:00:00,450 --> 00:00:08,848
+00:00:00,450 --> 00:00:09,039
 This sentence is on a product page. In the EU, it is now banned — unless the seller can prove the claim.
 
 2
-00:00:10,348 --> 00:00:16,278
+00:00:10,539 --> 00:00:16,438
 Claim Check marks the claims that are now illegal, on the page you are shopping on.
 
 3
-00:00:17,378 --> 00:00:29,476
+00:00:17,538 --> 00:00:30,024
 Directive 2024/825 applies from 27 September 2026. It covers stock already on the shelves.
 
 4
-00:00:30,776 --> 00:00:40,625
+00:00:31,324 --> 00:00:41,839
 Eco-friendly. Climate neutral. Biodegradable. Without proof, the words are the problem.
 
 5
-00:00:41,975 --> 00:00:50,894
+00:00:43,189 --> 00:00:51,936
 It reads the visible text of the page: four banned claims here, two that need evidence.
 
 6
-00:00:52,194 --> 00:01:00,744
+00:00:53,236 --> 00:01:01,900
 Each finding quotes the sentence, marks the phrase, and names the article.
 
 7
-00:01:02,044 --> 00:01:06,892
+00:01:03,200 --> 00:01:08,221
 Six rules. Four banned practices, and two that need evidence.
 
 8
-00:01:09,192 --> 00:01:15,326
+00:01:10,521 --> 00:01:16,346
 It stays quiet when the words are ordinary. Green tea is not a green claim.
 
 9
-00:01:17,076 --> 00:01:21,833
+00:01:18,096 --> 00:01:22,972
 One bookmark, any product page. No account, no extension.
 
 10
-00:01:23,333 --> 00:01:29,759
+00:01:24,472 --> 00:01:30,752
 The page text never leaves the browser. That is what makes it safe on a checkout page.
 
 11
-00:01:31,159 --> 00:01:38,663
+00:01:32,152 --> 00:01:40,015
 Thirteen saved pages. Three findings, all reviewed. A pilot, not a survey.
 
 12
-00:01:40,063 --> 00:01:45,957
+00:01:41,415 --> 00:01:47,082
 It cannot see images, it does not judge the product, and it reads English only.
 
 13
-00:01:47,557 --> 00:01:52,745
+00:01:48,682 --> 00:01:53,816
 The directive already names the words. Claim Check shows you where they are.

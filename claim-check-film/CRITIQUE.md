@@ -43,6 +43,23 @@ Reviewed on frames pulled from the master (`claim-check.mp4`), at 39.9, 40.1, 44
 2. **The anatomy frame's empty left margin.** The quote card could be wider (a 1,100 px card with the sentence on three lines) so the exhibit fills its third of the frame.
 3. **No sound design on the title letters.** The per-character drop is silent; a soft paper tick per glyph would tie it to the print grammar.
 
+## Second pass — playback, delivery and legibility
+
+Five things came back from the first delivery; all five are now in the master.
+
+| Reported | Cause | Fix |
+|---|---|---|
+| "This video's format can't play here" | the first master was full-range `yuvj420p` at 4K, a combination some players refuse | both masters are re-encoded once from the frame sequence: H.264 High, `yuv420p`, limited range, BT.709, `faststart`, AAC-LC. The 4K also re-encoded a second time after the first attempt decoded with errors; the shipped file decodes with zero errors |
+| The audio is flat | the take was `bm_george` at 0.95 — a neutral read | re-recorded as `bm_fable` at 0.80, then processed for emphasis: 80 Hz high-pass, presence at 2.1 kHz and 4.8 kHz, a differentiated-signal bite on the consonants, soft saturation, a parallel compressor under it, and phrase-level contrast so stressed words sit above the rest. No word is changed |
+| The dot field at 0:11 has a hard rectangle | the field was clipped to its bounding box | it is now drawn per dot with an elliptical falloff, so dots shrink and fade into the paper at every edge and the shape has no corners |
+| The checkmarks at 0:19–0:24 looked wrong | two hand-placed strokes with square caps and the wrong proportions | redrawn as a proper tick — short arm, long arm, round caps and joins, drawn on over 0.55 s |
+| The install panel is unreadable | the whole 1146×2982 capture squeezed into 240 px | an excerpt of the capture (top 1560 px) at 452 px wide, roughly 40% of the original, with a bottom fade so it reads as a scroll rather than a crop, labelled `EXCERPT · THE LIST CONTINUES` |
+
+The length moved from 116.0 s to 117.1 s because the new take is 1.1 s longer; every scene start, the SRT and the board were regenerated from the measured durations rather than retyped.
+
+### Still not checked
+- I still cannot hear the mix. The emphasis chain was checked numerically (integrated loudness −14.0 LUFS after mastering, true peak −1.2 dBTP, no clipping) and by inspection of the filter chain, not by ear.
+
 ## Not checked
 
 - I did not watch the film in real time, and I cannot hear it. The mix was checked numerically (integrated loudness −13.9 LUFS, no clipping, voice above music) and the frame timing by contact sheet, not by ear.

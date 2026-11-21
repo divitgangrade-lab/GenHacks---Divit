@@ -1,0 +1,80 @@
+[
+ {
+  "id": "v01",
+  "text": "This sentence is on a product page. In the European Union, it is now banned, unless the seller can prove the claim.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v02",
+  "text": "Claim Check marks the claims that are now illegal, on the page you are shopping on.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v03",
+  "text": "Directive 2024 slash 825 applies from the twenty-seventh of September, 2026. It covers stock already on the shelves.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v04",
+  "text": "Eco-friendly. Climate neutral. Biodegradable. Without proof of recognised excellent performance, the words themselves are the problem.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v05",
+  "text": "Claim Check reads the visible text of the page and lists what matches. Four banned claims here, and two that need evidence.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v06",
+  "text": "Each finding quotes the sentence, marks the exact phrase, and names the article, plus the evidence that would make it lawful.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v07",
+  "text": "Six rules. Four banned practices, and two that need evidence.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v08",
+  "text": "And it stays quiet when the words are ordinary. Green tea is not a green claim.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v09",
+  "text": "One bookmark, any product page. No account, no extension.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v10",
+  "text": "The page text never leaves the browser. That is what makes it safe on a checkout page.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v11",
+  "text": "Thirteen saved pages. Three findings, all reviewed as true positives. A pilot, not a survey.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v12",
+  "text": "It cannot see images, it does not judge the product, and it reads English only.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ },
+ {
+  "id": "v13",
+  "text": "The directive already names the words. Claim Check shows you where they are.",
+  "voice": "bm_fable",
+  "speed": 0.8
+ }
+]
