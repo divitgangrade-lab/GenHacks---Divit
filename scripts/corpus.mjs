@@ -1,10 +1,10 @@
 // Run with: npm run corpus -- path/to/saved-pages
 // (or: node scripts/corpus.mjs corpus --json)
 //
-// Answers one question: of the real product pages somebody saved, how many
+// It answers one question. Of the real product pages somebody saved, how many
 // carry a claim the directive now bans? It reads the same src/rules.js and
 // src/scan.js the bookmarklet runs, so the number it prints is the number the
-// panel would show — the only difference is where the text comes from.
+// panel would show. Only the text extraction differs.
 //
 // Method, in short (the long version is in README.md):
 //   1. Save pages by hand, one file each, before looking at the results.
@@ -12,12 +12,12 @@
 //   3. A page counts once, however many findings it has.
 //
 // What it deliberately does not do: render JavaScript, follow links, read
-// attributes such as alt text, or fetch anything. A saved page is a snapshot,
+// attributes such as alt text, or fetch anything. It reads a saved snapshot,
 // not the live site.
 
 import { readdir, readFile } from 'node:fs/promises'
 import { execFile } from 'node:child_process'
-import { join, extname, basename } from 'node:path'
+import { join, basename } from 'node:path'
 import { promisify } from 'node:util'
 import { scan, summarise } from '../src/scan.js'
 import { RULES, ruleById } from '../src/rules.js'
@@ -47,9 +47,9 @@ function decodeEntities (text) {
   })
 }
 
-// Visible text, roughly: what a reader sees, not the markup around it. This is
-// the one place the corpus run and the bookmarklet differ, because the
-// bookmarklet has a real DOM to walk and this has only the bytes.
+// Visible text: what a reader sees, not the markup around it. This is the one
+// place the corpus run and the bookmarklet differ, because the bookmarklet has
+// a real DOM to walk and this has only the bytes.
 function textFromSavedPage (raw) {
   const html = raw
     .replace(/<!--[\s\S]*?-->/g, ' ')
@@ -77,7 +77,7 @@ async function main () {
     entries = await readdir(folder, { withFileTypes: true })
   } catch (error) {
     console.error(`Cannot read ${folder}: ${error.code === 'ENOENT' ? 'no such folder' : error.message}`)
-    console.error('Save product pages into it first — one file per page. See README.md, "Measuring it against real pages".')
+    console.error('Save product pages into it first, one file per page. See README.md, section "Measuring it against real pages".')
     process.exit(1)
   }
 

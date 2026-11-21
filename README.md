@@ -8,7 +8,7 @@ Yet most shop pages still carry them. Claim Check reads the page, finds those cl
 
 ## Why this, and not another carbon calculator
 
-- **The rule already exists.** No estimation, no emission factors to argue about: a specific law names specific phrases, with a citation each.
+- **The rule already exists.** The law names the phrases, so there are no emission factors to argue about. Each rule carries its citation.
 - **The failure is visible in one second.** One click on a real product page and the claims light up.
 - **It runs client-side.** The page text never leaves the browser, so it is safe on a checkout page.
 - **It is a check, not a rewrite.** Every finding quotes the exact words and the article, so a reader can disagree with it in public.
@@ -24,7 +24,7 @@ tests/run.mjs  21 assertions against the scanner
 scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
-The split matters: the decision layer is pure and testable, and the two renderers (inline in the demo, floating panel on a live page) share it.
+The decision layer is pure and testable. The demo page and the floating panel share it, through two small renderers.
 
 ## Run it
 
@@ -41,7 +41,7 @@ Drag **Check this page** from the demo onto your bookmarks bar, then click it on
 ## What it will not do
 
 - **It cannot see images.** A leaf logo with no text is invisible to it, and soft claims like "kinder to the planet" are not in the blacklist yet.
-- **It does not judge the product.** It flags wording, not facts: a page can break the rules while being genuinely green, and the reverse is also true.
+- **It does not judge the product.** It flags wording, not facts. A page can break the rules while being genuinely green, and a green product can still fail the wording test.
 - **It is English-only, and EU-only.** The UK and US have different regimes.
 - **It is not legal advice**, and it does not know whether a national authority has started enforcing.
 
@@ -49,7 +49,7 @@ These are limits of a text check, not bugs to fix later.
 
 ## Measuring it against real pages
 
-A single demo page proves the scanner works. It does not say how common the claims are, and "most shop pages still carry them" is a claim of its own, so it gets measured rather than asserted. `scripts/corpus.mjs` runs the same rule set over a folder of pages somebody saved and prints the count.
+The demo page shows that the scanner works. It does not show how common the claims are, and "most shop pages still carry them" is a claim in need of a number. `scripts/corpus.mjs` measures it: it runs the same rule set over a folder of saved pages and prints the count.
 
 ```bash
 mkdir -p corpus
@@ -59,15 +59,15 @@ npm run corpus              # or: npm run corpus -- corpus --json
 
 The method, so the number can be argued with:
 
-1. **Fix the sample before looking at results.** Write down the list of pages first — for example the first product page of each of 30 EU-facing shops in one category — and save exactly those. Dropping a page after seeing what it says is how a hit rate becomes fiction.
-2. **Save the pages by hand**, browser menu → *Save page as* → *Web page, HTML only*, into `corpus/`, one file per page, named `NNN-shop-product.html`. No crawling, no scraping, no scripts fetching anything: the pages are read from disk.
+1. **Fix the sample before looking at results.** Write the list of pages down first. For example, the first product page of each of 30 EU-facing shops in one category, saved exactly as listed. Dropping a page after seeing what it says turns a hit rate into fiction.
+2. **Save the pages by hand.** Use the browser menu, *Save page as*, *Web page, HTML only*, and save into `corpus/`, one file per page, named `NNN-shop-product.html`. There is no crawling and no scraping. The script reads the files from disk and fetches nothing.
 3. **Count pages, not findings.** A page counts once if it carries at least one banned claim, however many it has. The per-rule table counts a page once per rule, so it sums to more than the page total.
-4. **Skip the unreadable.** A save that lands on a cookie wall or fails halfway is dropped by a length floor (fewer than 30 words), and reported as skipped rather than as clean, because counting those as clean would flatter the result.
-5. **Report the sample with the number**: how many pages, from where, saved on what date, and the commit the scanner ran at — the script prints the commit itself.
+4. **Skip the unreadable.** The script drops any save under 30 words, which catches a cookie wall or a save that failed halfway, and reports it as skipped rather than as clean. Counting those as clean would flatter the result.
+5. **Report the sample with the number.** Say how many pages, from where, saved on what date, and which commit the scanner ran at. The script prints the commit itself.
 
-How a saved page becomes text, and where that differs from the bookmarklet: the browser version walks the live DOM and skips marked regions. The corpus version only has bytes, so it drops comments, `script`, `style`, `noscript`, `template`, `svg` and `iframe` blocks, strips the remaining tags, decodes entities and collapses whitespace. Everything after that — every pattern, guard, citation and severity — is the identical code path.
+A saved page becomes text differently from the bookmarklet. The browser version walks the live DOM and skips marked regions. The corpus version has only bytes, so it drops comments, `script`, `style`, `noscript`, `template`, `svg` and `iframe` blocks, strips the remaining tags, decodes entities and collapses whitespace. Everything after that is one shared code path, and every pattern, guard, citation and severity comes from the same two files.
 
-What the number therefore cannot see: copy rendered by JavaScript after load (missing from a saved page), words inside attributes such as `alt` and `title`, text inside images and badges, pages behind a consent wall, and any language other than English. It is a lower bound on a hand-picked sample, not a survey of EU e-commerce.
+The number therefore cannot see copy rendered by JavaScript after load, words inside attributes such as `alt` and `title`, text baked into images and badges, pages behind a consent wall, or any language other than English. It is a lower bound on a hand-picked sample, not a survey of EU e-commerce.
 
 ## Where the phrases come from
 
@@ -82,7 +82,7 @@ Wording the directive does **not** blacklist stays out: `sustainable`, `consciou
 ## Next
 
 - A rule editor so a lawyer can add a phrase without touching code.
-- A published corpus run: 100–200 saved pages, dated, with the per-rule table, so the hit rate is a number a judge can check instead of a slogan.
+- A published corpus run of 100 to 200 saved pages, dated, with the per-rule table, so the hit rate is a number a judge can check.
 
 Sources: [Directive (EU) 2024/825](https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng) and the [Commission's Q&A](https://commission.europa.eu/document/download/3c257883-bb2a-4dd9-a6dc-501d587bb34f_en).
 
