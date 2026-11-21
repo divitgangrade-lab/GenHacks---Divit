@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy, accessibility and terms — Claim Check</title>
+  <meta name="description" content="How Claim Check handles data, its accessibility target, and the terms of this student demo.">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead" data-scan-skip>
+    <p class="kicker">Claim Check · legal notices</p>
+    <h1>Privacy, accessibility and terms</h1>
+    <p class="lede">Plain-language notices for a student hackathon demo. This page is information, not legal advice.</p>
+  </header>
+
+  <main class="legal" id="main" tabindex="-1">
+    <p class="legal__meta">Last updated: 21 November 2026. <a href="./">Back to the checker</a></p>
+
+    <section id="privacy" aria-labelledby="privacy-heading">
+      <h2 id="privacy-heading">Privacy notice</h2>
+      <p><strong>Claim Check does not collect personal data.</strong> The Claim Check pages do not set cookies, run analytics, show advertising, use session replay, or include tracking pixels or third-party embeds.</p>
+
+      <h3>What happens when you use the bookmarklet</h3>
+      <p>The bookmarklet runs in your browser. It reads the visible text of the page you are on and builds the findings panel locally. It does not send the page text, the page address, or the findings to us or to any third party. It loads its own code from this site; that is an ordinary request to the hosting provider.</p>
+
+      <h3>Hosting</h3>
+      <p>This site is served by GitHub Pages. GitHub may process standard request data such as an IP address, browser user agent, and requested URL under the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>. The Claim Check project does not receive or use those server logs.</p>
+
+      <h3>External links</h3>
+      <p>Links to EUR-Lex, the European Commission, GitHub, and React Bits leave this site. Those sites have their own privacy and cookie practices. The corpus script runs locally on files you save; it does not fetch pages or upload them.</p>
+
+      <h3>Children, sale and sharing</h3>
+      <p>The site is not directed to children under 13 and does not knowingly collect information from them. There is no personal information to sell or share, and no targeted advertising to opt out of. Because no personal data is stored, there is no access, correction, deletion or portability request for us to fulfil; questions can be raised through the contact link below.</p>
+    </section>
+
+    <section id="accessibility" aria-labelledby="accessibility-heading">
+      <h2 id="accessibility-heading">Accessibility statement</h2>
+      <p>The checker targets <strong>WCAG 2.2 Level AA</strong>. It is a small static page with semantic landmarks and headings, a skip link, visible keyboard focus, keyboard-operable controls, text contrast above the AA thresholds, and a layout that reflows on narrow screens. The main page stops transitions and animations when the visitor prefers reduced motion.</p>
+
+      <h3>Known limitations</h3>
+      <ul>
+        <li>The motion showroom is an experimental gallery of 50 third-party React Bits components. Some canvas, WebGL, cursor and animation tiles may depend on a pointer, may not be fully described to assistive technology, or may not honour reduced-motion preferences. It is not part of the checker.</li>
+        <li>The findings panel is a labelled dialog that appears after the bookmarklet runs. It moves focus to its Close button, supports Escape, and does not trap focus, so the page underneath remains reachable.</li>
+        <li>No manual audit with assistive-technology users has been completed, and the automated test suite checks the scanner, not WCAG conformance. This statement is a target and a list of known limits, not a claim of certification.</li>
+      </ul>
+
+      <p>If something is inaccessible, open an issue with the page and the assistive technology you used: <a href="https://github.com/divitgangrade-lab/GenHacks---Divit/issues">Claim Check issues</a>. We will try to fix it.</p>
+    </section>
+
+    <section id="terms" aria-labelledby="terms-heading">
+      <h2 id="terms-heading">Terms and disclaimer</h2>
+      <p><strong>Claim Check is an informational demo, not legal advice.</strong> It is a text-matching tool. It can miss a claim, flag wording that is lawful in context, and cannot see images, scripts rendered after load, or whether a national authority has enforced the directive. Do not rely on it for a purchasing, compliance, or legal decision. Read the <a href="https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng">Directive (EU) 2024/825</a> and take professional advice for your situation.</p>
+
+      <p>The site and its original code are provided under the <a href="./LICENSE">MIT License</a>, without warranty. The React Bits components in the showroom are not covered by that MIT grant; they remain under the MIT + Commons Clause License Condition v1.0 and the notices in <a href="./THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a>.</p>
+
+      <p>Findings are statements about wording, not accusations that a named business has committed an offence. Please do not use the tool to harass, defame, or misrepresent a person or business. Links to other sites are provided for reference and do not imply endorsement.</p>
+
+      <p>To the extent permitted by law, the project is not liable for decisions made from its output. These notices may be updated as the site changes; the date above is the current version.</p>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-heading">
+      <h2 id="contact-heading">Contact and ownership</h2>
+      <p>Claim Check is a student hackathon project maintained by <strong>divitgangrade-lab</strong>. No company registration, physical business address, or professional legal status is claimed. The public contact channel is <a href="https://github.com/divitgangrade-lab/GenHacks---Divit/issues">GitHub Issues</a>.</p>
+      <p>The site was written with AI assistance (Freebuff); human review, tests and the git history document the changes. See the <a href="./COMPLIANCE.md">100-item compliance register</a> for what is implemented, what does not apply to this demo, and what only the operator can do.</p>
+    </section>
+  </main>
+
+  <footer class="site-foot" data-scan-skip>
+    <p>© 2026 divitgangrade-lab. <a href="./">Checker</a> · <a href="#privacy">Privacy</a> · <a href="#accessibility">Accessibility</a> · <a href="#terms">Terms</a> · <a href="https://github.com/divitgangrade-lab/GenHacks---Divit">Source and contact</a></p>
+    <p>Written with AI assistance (Freebuff). Informational only; not legal advice.</p>
+  </footer>
+</body>
+</html>

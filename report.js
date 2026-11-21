@@ -82,8 +82,18 @@ function renderPanel (doc, hits) {
       </footer>
     </div>`
 
-  root.querySelector('[data-close]').addEventListener('click', () => host.remove())
+  const close = root.querySelector('[data-close]')
+  const onKey = event => {
+    if (event.key === 'Escape') dismiss()
+  }
+  const dismiss = () => {
+    doc.removeEventListener('keydown', onKey)
+    host.remove()
+  }
+  close.addEventListener('click', dismiss)
+  doc.addEventListener('keydown', onKey)
   doc.body.appendChild(host)
+  close.focus()
   return host
 }
 

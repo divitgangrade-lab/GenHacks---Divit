@@ -121,6 +121,8 @@ Wording the directive does **not** blacklist stays out: `sustainable`, `consciou
 - A rule editor so a lawyer can add a phrase without touching code.
 - A published corpus run of 100 to 200 saved pages, dated, with the per-rule table, so the hit rate is a number a judge can check.
 
+Legal notices: [privacy, accessibility and terms](legal.html) and the [100-item compliance register](COMPLIANCE.md).
+
 Sources: [Directive (EU) 2024/825](https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng) and the [Commission's Q&A](https://commission.europa.eu/document/download/3c257883-bb2a-4dd9-a6dc-501d587bb34f_en).
 
 Built for GenHacks 2026. Written with AI assistance (Freebuff).
