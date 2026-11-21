@@ -16,9 +16,11 @@
 // not the live site.
 
 import { readdir, readFile } from 'node:fs/promises'
+import { realpathSync } from 'node:fs'
 import { execFile } from 'node:child_process'
 import { join, basename } from 'node:path'
 import { promisify } from 'node:util'
+import { pathToFileURL } from 'node:url'
 import { scan, summarise } from '../src/scan.js'
 import { RULES, ruleById } from '../src/rules.js'
 
@@ -148,7 +150,19 @@ async function main () {
   for (const row of rows) console.log(`${String(row.count).padStart(4)} pages  ${row.label}`)
 }
 
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+// Comparing a raw path to a URL only works when the path has no spaces, no
+// symlink and no drive letter. pathToFileURL plus realpath is what actually
+// matches import.meta.url, so a folder called "saved pages" still runs.
+function invokedDirectly () {
+  if (!process.argv[1]) return false
+  try {
+    return pathToFileURL(realpathSync(process.argv[1])).href === import.meta.url
+  } catch {
+    return false
+  }
+}
+
+if (invokedDirectly()) {
   main().catch(error => {
     console.error(error)
     process.exit(1)
