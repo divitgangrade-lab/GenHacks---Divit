@@ -34,15 +34,15 @@ Reproduce with `node scripts/eval.mjs`.
 
 | Letter | FKGL | SMOG | Instructions | Facts checked | Meds | Appointments | Warnings | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Clean letter | 4.8 → 4.3 | 8.4 → 8.7 | 12 | 27 | 3 | 1 | 3 | all kept |
-| Abbreviation soup | 4.1 → 4.7 | 7.4 → 8.7 | 12 | 18 | 3 | 1 | 2 | all kept |
-| Unusual instruction | 4.5 → 4.4 | 8.1 → 8.5 | 11 | 18 | 2 | 1 | 3 | all kept |
+| Clean letter | 4.8 → 4.4 | 8.4 → 8.7 | 10 | 26 | 3 | 1 | 3 | all kept |
+| Abbreviation soup | 4.1 → 5.3 | 7.4 → 8.8 | 12 | 18 | 3 | 1 | 2 | all kept |
+| Unusual instruction | 4.5 → 4.3 | 8.1 → 8.4 | 9 | 18 | 2 | 1 | 3 | all kept |
 
 Read that table carefully, because it contains the most useful thing this project learned: **the readability score barely moves, and on one letter it gets worse.**
 
 The reason is that these letters are lists of short lines, and Flesch-Kincaid rewards short lines. The "abbreviation soup" letter scores 4.1 while being completely unreadable to a patient, because `Amox 500mg PO TID x7d` is made of short words. Expanding that shorthand into "for 7 days" adds syllables, so the grade level rises even though the plan is far easier to act on.
 
-So the honest claim is not a grade-level drop. It is: **27 facts in, 27 facts out, verified; 18 pieces of clinical shorthand replaced; three medicines turned into four timed doses and one calendar file.** Grade level is a weak proxy and this project shows where it breaks.
+So the honest claim is not a grade-level drop. It is: **on the clean letter, 26 facts in and 26 facts out, verified; on the abbreviation letter, 17 pieces of clinical shorthand replaced, three medicines turned into four timed doses, and a calendar file exported.** Grade level is a weak proxy and this project shows where it breaks.
 
 ## What it does not do
 
@@ -50,12 +50,12 @@ So the honest claim is not a grade-level drop. It is: **27 facts in, 27 facts ou
 - **Date ambiguity.** `12/2/2026` is read as 2 December (month first). European order would invert it. A real deployment needs locale detection.
 - **Clinical judgement.** It does not check whether a dose is correct or a drug is appropriate. It only checks that nothing was lost.
 - **Real patient data.** Every sample letter is synthetic and written for this demo.
-- **A complete glossary.** Seventy terms. Anything outside it is carried through unchanged, which is safe but less plain.
+- **A complete glossary.** 71 terms. Anything outside it is carried through unchanged, which is safe but less plain.
 
 ## Run it
 
 ```bash
-npm test        # 18 assertion tests, no dependencies
+npm test        # 23 assertion tests, no dependencies
 npm run serve   # http://localhost:4173
 ```
 
