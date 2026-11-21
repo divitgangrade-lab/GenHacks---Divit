@@ -19,9 +19,21 @@ export const RULES = [
     title: 'Generic environmental claim',
     severity: 'banned',
     citation: 'Annex I, point 4a',
-    pattern: /\b(?:eco[- ]?friendly|environmentally[- ]friendly|climate[- ]friendly|carbon[- ]friendly|gentle on the environment|nature'?s friend|environmentally correct|ecological(?:ly)?|biodegradable|biobased)\b/gi,
+    pattern: /\b(?:eco[- ]?friendly|environmentally[- ]friendly|climate[- ]friendly|carbon[- ]friendly|gentle on the environment|nature'?s friend|environmentally correct|ecological(?:ly)?|energy[- ]efficient|biodegradable|biobased)\b/gi,
     says: 'Generic claims are blacklisted unless the seller can show recognised excellent environmental performance for this specific claim.',
-    evidence: 'An EU Ecolabel, a recognised national scheme such as Nordic Swan, or top performance under other EU law. The certificate, not the wording.',
+    evidence: 'An EU Ecolabel, a recognised national scheme such as Nordic Swan, or top performance under other EU law. "Energy efficient" can be shown with the top energy class under Regulation (EU) 2017/1369.',
+  },
+  {
+    id: 'similar',
+    title: 'The same promise in other words',
+    severity: 'banned',
+    citation: 'Annex I, point 4a, read with Recital 9 ("or similar statements")',
+    // Recital 9 closes its list with "or similar statements that suggest or
+    // create the impression of excellent environmental performance". These are
+    // that clause applied, not phrases the Commission quotes.
+    pattern: /\b(?:planet|earth)[- ]friendly\b|\benvironmentally sound\b|\beco[- ]conscious\b/gi,
+    says: 'The blacklist gives examples and then adds "or similar statements". Wording that sells the same vague promise falls under the same ban.',
+    evidence: 'Identical to any generic claim: recognised excellent environmental performance for this product, stated on the same page.',
   },
   {
     id: 'green',
@@ -40,7 +52,10 @@ export const RULES = [
     title: 'Neutrality claim resting on offsets',
     severity: 'banned',
     citation: 'Annex I, point 4c',
-    pattern: /\b(?:carbon[- ]neutral|climate[- ]neutral|carbon[- ]compensated|carbon[- ]positive|carbon[- ]negative|net[- ]zero)\b/gi,
+    // The lookahead is what keeps "net zero by 2040" for the future-promise
+    // rule. Without it this rule matches too and the two overlap, which used to
+    // need a whole overlap resolver in the scanner.
+    pattern: /\b(?:(?:carbon|climate)[- ]neutral|net[- ]zero|co(?:2|₂)[- ]neutral)(?!\s+by\s+(?:19|20)\d{2})\b|\b(?:carbon|climate)[- ]compensated\b|\bcarbon[- ](?:positive|negative)\b|\breduced climate impact\b|\blimited co(?:2|₂) footprint\b/gi,
     says: 'Claims of neutral, reduced or positive greenhouse-gas impact based on offsetting are banned outright. Only the product\'s own life-cycle impact counts.',
     evidence: 'A life-cycle assessment of the product itself, not purchased credits.',
   },
@@ -58,11 +73,18 @@ export const RULES = [
     title: 'Sustainability label with no named scheme',
     severity: 'needs-evidence',
     citation: 'Annex I, point 2a',
-    pattern: /\b(?:eco[- ]?certified|certified sustainable|sustainably certified|planet[- ]friendly certified|our own sustainability (?:certification|standard|label))\b/gi,
+    pattern: /\b(?:eco[- ]?certified|certified sustainable|sustainably certified)\b/gi,
     says: 'A sustainability label has to rest on a certification scheme or be set by a public authority. A label the seller invented does not count.',
     evidence: 'The name of the scheme, and a link to the certificate it issued.',
   },
 ]
+
+// One place decides what a severity is called. The panel, the findings list and
+// the rule table all read it from here.
+export const TAG_LABEL = {
+  banned: 'Banned',
+  'needs-evidence': 'Needs evidence',
+}
 
 export function ruleById (id) {
   return RULES.find(rule => rule.id === id)

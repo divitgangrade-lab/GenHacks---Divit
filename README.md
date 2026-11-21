@@ -18,10 +18,10 @@ Yet most shop pages still carry them. Claim Check reads the page, finds those cl
 ```
 src/rules.js   the rule set: pattern, plain-English reading, citation, evidence
 src/scan.js    pure functions: text in, findings out (no DOM, no network)
-src/panel.js   renders findings into a shadow root, immune to page CSS
-report.js      bookmarklet entry: scan the page you are on
-app.js         the demo page
-tests/run.mjs  14 assertions against the scanner
+src/scan.js    pure functions: text in, findings out (no DOM, no network)
+report.js      bookmarklet entry: reads the page, renders the panel in a shadow root
+app.js         the demo page, and its own renderer
+tests/run.mjs  21 assertions against the scanner
 ```
 
 The split matters: the decision layer is pure and testable, and the two renderers (inline in the demo, floating panel on a live page) share it.
@@ -31,7 +31,7 @@ The split matters: the decision layer is pure and testable, and the two renderer
 No build step, no install, no key.
 
 ```bash
-npm test          # 14 assertions
+npm test          # 21 assertions
 npm run serve     # http://localhost:3000
 ```
 
@@ -45,6 +45,16 @@ Drag **Check this page** from the demo onto your bookmarks bar, then click it on
 - **It is not legal advice**, and it does not know whether a national authority has started enforcing.
 
 These are limits of a text check, not bugs to fix later.
+
+## Where the phrases come from
+
+Annex I, point 4a says only that a generic environmental claim is banned without recognised excellent environmental performance. The example phrases are in Recital 9, and the Commission's Q&A quotes that recital verbatim. Every term in `src/rules.js` is one of three things, and the rule says which:
+
+- **Named in Recital 9:** environmentally friendly, eco-friendly, green, nature's friend, ecological, environmentally correct, climate friendly, gentle on the environment, carbon friendly, energy efficient, biodegradable, biobased.
+- **Named in Recital 12 for offsetting:** climate neutral, CO2 neutral certified, carbon positive, climate net zero, climate compensated, reduced climate impact, limited CO2 footprint.
+- **Covered by "or similar statements":** planet-friendly, earth-friendly, environmentally sound, eco-conscious. These are the closing clause of Recital 9 applied, not phrases the Commission quotes, and the rule is labelled that way.
+
+Wording the directive does **not** blacklist stays out: `sustainable`, `conscious`, `responsible` and `natural` are not flagged, because Recital 10 discusses them without banning them, and tests hold that line.
 
 ## Next
 

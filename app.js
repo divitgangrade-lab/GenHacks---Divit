@@ -1,5 +1,5 @@
 import { scan, summarise, verdictLine } from './src/scan.js'
-import { RULES, ruleById } from './src/rules.js'
+import { RULES, TAG_LABEL, ruleById } from './src/rules.js'
 
 const el = {
   fixture: document.getElementById('fixture'),
@@ -23,7 +23,7 @@ function renderRules () {
   el.rulesList.innerHTML = RULES.map(rule => `
     <li>
       <h3>${escapeHtml(rule.title)}</h3>
-      <p class="rule__citation">${escapeHtml(rule.citation)} · <span class="tag ${rule.severity}">${rule.severity === 'banned' ? 'Banned outright' : 'Needs evidence'}</span></p>
+      <p class="rule__citation">${escapeHtml(rule.citation)} · <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span></p>
       <p>${escapeHtml(rule.says)}</p>
       <p class="rule__evidence">What would satisfy it: ${escapeHtml(rule.evidence)}</p>
     </li>
@@ -44,7 +44,7 @@ function renderFindings () {
       <li>
         <p class="findings__head">
           <span class="findings__span">${escapeHtml(hit.span)}</span>
-          <span class="tag ${rule.severity}">${rule.severity === 'banned' ? 'Banned' : 'Needs evidence'}</span>
+          <span class="tag ${rule.severity}">${TAG_LABEL[rule.severity]}</span>
         </p>
         <p class="findings__rule">${escapeHtml(rule.title)}</p>
         <p class="findings__cite">${escapeHtml(rule.citation)}</p>

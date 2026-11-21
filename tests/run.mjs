@@ -79,6 +79,35 @@ test('the full demo page produces four banned and two evidence findings', () => 
   equal(summary.total, 6)
 })
 
+test('energy efficient is one of the named examples', () => {
+  equal(ids('An energy efficient kettle.').join(), 'generic')
+})
+
+test('planet-friendly is caught as a similar statement', () => {
+  equal(ids('A planet-friendly bottle.').join(), 'similar')
+})
+
+test('earth-friendly is caught the same way', () => {
+  assert(ids('Earth friendly refills.').includes('similar'), 'earth friendly not flagged')
+})
+
+test('the offset rule covers the greenhouse-gas wordings the Commission lists', () => {
+  const phrases = ['CO2 neutral', 'CO₂ neutral', 'climate compensated', 'reduced climate impact', 'limited CO2 footprint', 'climate net zero']
+  for (const phrase of phrases) {
+    assert(ids(`This carton is ${phrase}.`).includes('offset'), `missed: ${phrase}`)
+  }
+})
+
+test('a specific reduced-impact claim is not swept up', () => {
+  equal(scan('Reduced CO2 impact, from 100% renewable electricity at this plant.').length, 0)
+})
+
+test('terms the directive does not blacklist are left alone', () => {
+  for (const phrase of ['sustainable', 'conscious', 'responsible', 'natural']) {
+    equal(scan(`A ${phrase} choice for the home.`).length, 0, `over-reached on "${phrase}"`)
+  }
+})
+
 test('a compliant page produces no findings', () => {
   const text = 'Body is 100% recycled aluminium. Licensed under the EU Ecolabel, licence DK/001. Spare parts sold for ten years.'
   equal(scan(text).length, 0, 'clean copy flagged')
@@ -105,6 +134,15 @@ test('every rule can cite itself and say what would satisfy it', () => {
     assert(rule.says, `${rule.id} has no plain explanation`)
     assert(rule.pattern.global, `${rule.id} pattern must be global`)
     assert(rule.severity === 'banned' || rule.severity === 'needs-evidence', `${rule.id} has a bad severity`)
+  }
+})
+
+test('no rule can match an empty string', () => {
+  // The scanner no longer guards against zero-length matches; this is what
+  // makes that safe.
+  for (const rule of RULES) {
+    const pattern = new RegExp(rule.pattern.source, rule.pattern.flags)
+    assert(pattern.exec('') === null, `${rule.id} matches empty input`)
   }
 })
 
