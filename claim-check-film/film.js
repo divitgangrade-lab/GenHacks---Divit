@@ -52,34 +52,35 @@ function buildPaper() {
 }
 
 /* ───────────────────────── print ───────────────────────── */
-function halftone(x, y, w, h, step, angle, density, color, alpha = 1) {
+function halftone(x, y, w, h, step, angle, density, color, alpha = 1, o = {}) {
+  const feather = o.feather === undefined ? 64 : o.feather;
   const a = (angle * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a);
   const cx = x + w / 2, cy = y + h / 2, R = Math.hypot(w, h) / 2 + step;
+  // a band that touches the frame keeps its hard edge there; every edge that meets paper fades
+  const fL = x > 1, fR = x + w < W - 1, fT = y > 1, fB = y + h < H - 1;
   ctx.save();
-  ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-  ctx.beginPath();
-  for (let j = -R, jj = 0; j < R; j += step, jj++) {
+  ctx.fillStyle = color;
+  for (let j = -R; j < R; j += step) {
     for (let i = -R; i < R; i += step) {
       const px = cx + i * ca - j * sa, py = cy + i * sa + j * ca;
       if (px < x - step || px > x + w + step || py < y - step || py > y + h + step) continue;
-      const den = density(px, py);
+      let f = 1;
+      if (fL) f = Math.min(f, (px - x) / feather);
+      if (fR) f = Math.min(f, (x + w - px) / feather);
+      if (fT) f = Math.min(f, (py - y) / feather);
+      if (fB) f = Math.min(f, (y + h - py) / feather);
+      f = ss(clamp(f));
+      if (f <= 0.02) continue;
+      const den = density(px, py) * f;
       if (den <= 0.02) continue;
       const r = Math.min(step * 0.66, den * step * 0.62);
       if (r < 0.25) continue;
-      ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, 6.2832);
+      ctx.globalAlpha = alpha * clamp(f * 1.1);
+      ctx.beginPath(); ctx.arc(px, py, r, 0, 6.2832); ctx.fill();
     }
   }
-  ctx.fillStyle = color; ctx.globalAlpha = alpha; ctx.fill();
   ctx.restore();
-}
-
-function roundRectPath(g, x, y, w, h, r) {
-  g.beginPath();
-  g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r);
-  g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r);
-  g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
-  g.closePath();
+  ctx.globalAlpha = 1;
 }
 
 /* dots that dissolve into the paper: no clip, no edge — each dot carries its own fade */
@@ -409,7 +410,7 @@ S.product = (u) => {
   ctx.drawImage(imgs.demo, x, y, w, h);
   ctx.restore();
   // the column the checker fills
-  const bw = 456, bx = x + 480, by = y + 74, bh = 630;
+  const bw = 528, bx = x + 412, by = y + 42, bh = 636;
   const q = seg(u, 1.5, 2.3);
   if (q > 0) {
     ctx.strokeStyle = RED; ctx.lineWidth = 4;
@@ -428,8 +429,8 @@ S.product = (u) => {
   label('NOTHING IS UPLOADED', r, 548, { color: RED });
   txt('4 banned', r, 636, { size: 34, weight: 800, family: 'Inter' });
   txt('2 need evidence', r, 680, { size: 34, weight: 800, family: 'Inter' });
-  label('DEMO PAGE · SYNTHETIC COPY', r, 748, { size: 14 });
-  label('WRITTEN FOR THIS FILM', r, 772, { size: 14 });
+  label('DEMO PAGE · SYNTHETIC COPY', r, 736, { size: 14 });
+  label('WRITTEN FOR THIS FILM', r, 760, { size: 14 });
   halftone(r, 760, 520, 180, 22, 15, (px, py) => clamp((py - 760) / 180) * 0.55, INK, 0.08);
 };
 
@@ -472,14 +473,6 @@ S.anatomy = (u) => {
     txt(b, xx + 74, yy + 48, { size: 24, weight: 500, family: 'Inter', color: MUT });
     ctx.globalAlpha = 1;
   });
-  const lq = seg(u, 3.2, 3.9);
-  if (lq > 0) {
-    ctx.strokeStyle = RED; ctx.lineWidth = 2; ctx.globalAlpha = 0.8;
-    const sx = x + 40 + w1 + 110, sy = y + h - 10;
-    ctx.beginPath(); ctx.moveTo(sx, sy);
-    ctx.lineTo(lerp(sx, 1085, lq), lerp(sy, 524, lq));
-    ctx.stroke(); ctx.globalAlpha = 1;
-  }
   // what would make it lawful — the half of a finding people forget
   const eq = seg(u, 4.4, 4.9);
   if (eq > 0) {
@@ -501,7 +494,7 @@ S.rules = (u) => {
   const rules = [
     ['Generic environmental claim', 'BANNED', 'Annex I, 4a'],
     ['The same promise, other words', 'BANNED', 'Annex I, 4a'],
-    ['"Green" as a product claim', 'BANNED', 'Annex I, 4a'],
+    ['“Green” as a product claim', 'BANNED', 'Annex I, 4a'],
     ['Neutrality resting on offsets', 'BANNED', 'Annex I, 4c'],
     ['Future promise, no plan', 'NEEDS EVIDENCE', 'Art. 6(2)(d)'],
     ['Label, no named scheme', 'NEEDS EVIDENCE', 'Annex I, 2a'],
@@ -548,7 +541,7 @@ S.decoy = (u) => {
   ctx.fillStyle = RED; txt(word, x + 40 + pw, y2 + 104, { size: 40, weight: 700, family: 'Inter' });
   txt(post, x + 40 + pw + 108, y2 + 104, { size: 40, weight: 500, family: 'Inter' });
   label('BANNED · ANNEX I, POINT 4a', x + 40, y2 + 152, { color: RED });
-  stamp('BANNED', x + w2 - 150, y2 + 100, { p: seg(u, 6.1, 6.4), size: 44, rot: -0.07 });
+  stamp('BANNED', x + w2 + 170, y2 + 150, { p: seg(u, 6.1, 6.4), size: 44, rot: -0.07 });
 };
 
 // 09 — install
@@ -601,8 +594,8 @@ S.install = (u) => {
   ctx.restore();
   label('THE PANEL, ON THIS PAGE', px, py + ph + 54);
   label('EXCERPT · THE LIST CONTINUES', px, py + ph + 78, { size: 13 });
-  italicFill('The panel opens on the page,', M + 40, 566, 34, MUT);
-  italicFill('with every finding in it.', M + 40, 608, 34, MUT);
+  italicFill('The panel opens on the page,', M + 40, 706, 34, MUT);
+  italicFill('with every finding in it.', M + 40, 748, 34, MUT);
   const rq = seg(u, 3.2, 3.7);
   if (rq > 0) {
     ctx.globalAlpha = rq;
