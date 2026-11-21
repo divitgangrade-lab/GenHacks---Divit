@@ -122,11 +122,19 @@ Four images, all 1536×1024 (exactly 3:2, under 5 MB), captured from the live Pa
 
 ## Video demo link
 
-**Not recorded yet.** The form wants a YouTube or Vimeo URL, so this is the one field that cannot be filled from the repo. The shooting script — pre-flight checks, beat timings, voice-over and edit notes for a 2:30 cut — is in [SUBMISSION.md](SUBMISSION.md#demo-video-shot-list-230-target-200245-acceptable). Record it on an EU-facing product page that still carries a blacklisted phrase, upload it, and paste the URL.
+**Rendered, not yet uploaded.** `claim-check-film/claim-check.mp4` — 1:56, 3840×2160, 30 fps, −13.9 LUFS, 152 MB. Poster: `claim-check-film/poster.jpg`. Sidecar captions: `claim-check-film/subtitles_en.srt` (the same lines are burned into the picture).
+
+Devpost embeds a YouTube or Vimeo URL, so this file still has to be uploaded from your account and its URL pasted into the field. Upload `claim-check.mp4` as-is — no re-encode needed — and use:
+
+> Claim Check — the claim, the sentence, the article (GenHacks 2026)
+
+What it contains, in order: the banned sentence and its stamp; the title; Directive 2024/825 and its date; the three words it names first; the demo page as an exhibit; one finding opened into sentence, rule and citation; the six rules; the green-tea decoy; the bookmarklet install; the privacy promise; the dated 13-page run with its limits; what the tool will not do; the end card with both URLs.
+
+The shot list this film replaced is in [SUBMISSION.md](SUBMISSION.md#demo-video-shot-list-230-target-200245-acceptable); the direction, the frame-by-frame board, the review and the critique are in [`claim-check-film/`](claim-check-film/).
 
 ## Before submitting
 
-- [ ] Video uploaded and URL pasted above.
+- [ ] Video uploaded to YouTube or Vimeo and its URL pasted above.
 - [ ] Four gallery images uploaded in the order listed.
 - [ ] **Healthcare & Environmental** selected as the track.
 - [ ] Repo and demo links opened once from a logged-out browser.

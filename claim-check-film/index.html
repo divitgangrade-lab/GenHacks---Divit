@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claim Check — the case file</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #e9dfc7; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+  import { init, render, DUR } from './film.js';
+
+  const cv = document.getElementById('c');
+  const fit = () => { cv.width = Math.round(innerWidth); cv.height = Math.round(innerHeight); };
+  fit();
+  addEventListener('resize', fit);
+
+  // optional slice for chunked rendering: ?t0=40&t1=80 renders that span only
+  const q = new URLSearchParams(location.search);
+  const t0 = Number(q.get('t0') || 0);
+  const t1 = Number(q.get('t1') || DUR);
+  window.DUR = t1 - t0;
+  window.render = (t) => render(t + t0);
+
+  await init(cv);
+  window.READY = true;
+</script>
+</body>
+</html>

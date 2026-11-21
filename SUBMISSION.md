@@ -2,6 +2,8 @@
 
 Deadline: 26 December 2026, 12:00am EST. This file is the copy to paste into Devpost, plus the shot list for the demo video. Nothing here is recorded yet. Field-by-field paste-in copy, tags, links and the gallery images are in [DEVPOST.md](DEVPOST.md).
 
+**Recorded film:** `claim-check-film/claim-check.mp4` — 1:56, 3840×2160, 30 fps, −13.9 LUFS. The shot list below is kept as the brief it was shot to; the finished cut, its board and its review are in [`claim-check-film/`](claim-check-film/).
+
 ## Track
 
 **Healthcare & Environmental** (the Devpost track is a single combined track; this project sits on the environmental side).
