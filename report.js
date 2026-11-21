@@ -1,18 +1,13 @@
 // Entry point loaded by the bookmarklet. Reads the page the reader is on and
-// leaves a panel behind. This is the only module that touches the DOM: the
-// scanner and the rules stay pure, and the demo page has its own renderer.
+// leaves a panel behind. The scanner and the rules stay pure; page text comes
+// from src/text.js, and this is the only module that writes to the DOM.
 
 import { scan, summarise, verdictLine } from './src/scan.js'
 import { TAG_LABEL, ruleById, SOURCES } from './src/rules.js'
 import { escapeHtml } from './src/escape.js'
+import { domText } from './src/text.js'
 
 const HOST_ID = 'claim-check-panel'
-
-// A page that talks about banned phrases (this site's own rule table, a news
-// article, another checker) can mark those regions so a scan reports the
-// product, not the commentary. Off by default: on a real shop page nothing is
-// marked, so everything is read.
-const SKIP = '[data-scan-skip], #claim-check-panel, script, style, noscript, svg, template, [hidden]'
 
 const STYLES = `
   :host { all: initial; }
@@ -48,21 +43,6 @@ const STYLES = `
   footer { padding: 10px 16px 14px; border-top: 1px solid #ded6c5; font-size: 12px; color: #7a7264; }
   a { color: #0e3d33; }
 `
-
-export function readableText (doc, root) {
-  // Not dead code: a bookmarklet injected before a body exists would otherwise
-  // throw here and leave the reader with nothing at all.
-  if (!root) return ''
-  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT)
-  const parts = []
-  let node
-  while ((node = walker.nextNode()) !== null) {
-    if (!node.nodeValue.trim()) continue
-    if (node.parentElement.closest(SKIP)) continue
-    parts.push(node.nodeValue)
-  }
-  return parts.join(' ')
-}
 
 function renderPanel (doc, hits) {
   const summary = summarise(hits)
@@ -111,4 +91,4 @@ function renderPanel (doc, hits) {
 // cache, before the marker existed: the id was there from the first version.
 document.getElementById(HOST_ID)?.remove()
 const subject = document.querySelector('[data-scan-root], #fixture') ?? document.body
-renderPanel(document, scan(readableText(document, subject)))
+renderPanel(document, scan(domText(document).text(subject)))

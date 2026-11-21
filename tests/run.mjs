@@ -1,8 +1,18 @@
 // Run with: npm test   (or: node tests/run.mjs)
 // No dependencies, no browser. The scanner is pure, so it is tested directly.
 
+import { execFileSync } from 'node:child_process'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { scan, summarise, verdictLine } from '../src/scan.js'
 import { RULES, ruleById } from '../src/rules.js'
+import {
+  bytesText, domText, isSkippedElement, textFromSavedPage,
+  SKIP_ATTRIBUTES, SKIP_IDS, SKIP_SELECTOR, SKIP_TAGS
+} from '../src/text.js'
+import { countPages, MIN_WORDS } from '../src/corpus.js'
 
 let passed = 0
 let failed = 0
@@ -154,6 +164,256 @@ test('the verdict line counts both severities', () => {
   const line = verdictLine(summarise(scan(FIXTURE)))
   assert(line.startsWith('4 banned claims and 2 needing evidence'), line)
 })
+
+// --- the shared page-text seam and the corpus counting rules ---
+
+function filler (words) {
+  return Array.from({ length: words }, (_, i) => `word${i}`).join(' ')
+}
+
+test('a saved page drops a region marked data-scan-skip', () => {
+  const html = '<body><div data-scan-skip><p>Our eco-friendly bottle is carbon neutral.</p></div><p>Body is 100% recycled aluminium.</p></body>'
+  const text = textFromSavedPage(html)
+  assert(!/eco-friendly/i.test(text), 'the skipped region survived')
+  assert(/recycled aluminium/.test(text), 'the rest of the page was lost')
+  equal(scan(text).length, 0)
+})
+
+test('a data-scan-skip region goes whole, however deeply nested', () => {
+  const html = '<body><div data-scan-skip><div><p>eco-friendly</p><div>carbon neutral</div></div></div><p>Spare parts sold for ten years.</p></body>'
+  const text = textFromSavedPage(html)
+  equal(scan(text).length, 0, 'text leaked out of the skipped region')
+  assert(text.includes('ten years'), 'the text after the region was lost')
+})
+
+test('the saved-page reader drops the same non-prose blocks as the browser walker', () => {
+  for (const tag of ['script', 'style', 'noscript', 'template', 'svg', 'iframe']) {
+    const text = textFromSavedPage(`<body><${tag}>eco-friendly bottle</${tag}><p>Body is recycled aluminium.</p></body>`)
+    assert(!/eco-friendly/i.test(text), `${tag} text was read`)
+    assert(/recycled aluminium/.test(text), `${tag} swallowed the rest of the page`)
+  }
+  const withoutTitle = textFromSavedPage('<html><head><title>Eco-friendly bottle</title></head><body><p>Body is recycled aluminium.</p></body></html>')
+  assert(!/eco-friendly/i.test(withoutTitle), 'the <title> was read as page text')
+
+  const withHidden = textFromSavedPage('<body><p hidden>eco-friendly bottle</p><p aria-hidden="true">Carbon neutral carton</p><p>Body is recycled aluminium.</p></body>')
+  assert(!/eco-friendly/i.test(withHidden), 'a hidden block was read')
+  assert(/carbon neutral/i.test(withHidden), 'aria-hidden text is visible, so it should be read')
+})
+
+test('a saved page decodes entities before scanning', () => {
+  const found = ids(textFromSavedPage('<p>Our eco&nbsp;friendly bottle is carbon&#160;neutral.</p>'))
+  assert(found.includes('generic'), 'eco friendly was not matched after decoding')
+  assert(found.includes('offset'), 'carbon neutral was not matched after decoding')
+})
+
+test('the corpus reads the demo card the same way the bookmarklet does', () => {
+  const html = `<article id="fixture" data-scan-root>
+    <h2>Fern &amp; Fold Bamboo Bottle</h2>
+    <p class="product__price">£28 · 750 ml</p>
+    <p>Our eco-friendly bottle is carbon neutral and packaged in biodegradable wrap. Every order is eco-certified by our own sustainability team, so you can go green without thinking about it.</p>
+    <p>We are proud to be net zero by 2040.</p>
+    <p class="product__aside">Pairs well with green tea and green beans.</p>
+  </article>`
+  const summary = summarise(scan(textFromSavedPage(html)))
+  equal(summary.banned, 4, 'banned claims')
+  equal(summary.needsEvidence, 2, 'claims needing evidence')
+  equal(summary.total, 6, 'findings')
+})
+
+test('a file too short to be a page is skipped, not counted clean', () => {
+  const result = countPages([{ file: 'consent-wall.html', text: `eco-friendly ${filler(28)}` }])
+  equal(MIN_WORDS, 30, 'the floor moved')
+  equal(result.pages.length, 0, 'short file read as a page')
+  equal(result.skipped, 1, 'short file not reported')
+  equal(result.pagesWithBannedClaim, 0)
+  equal(result.bannedRate, 0)
+  equal(result.findings, 0, 'a skipped file contributed findings')
+})
+
+test('a page at the word floor is read and counted', () => {
+  const result = countPages([{ file: 'thirty.html', text: `eco-friendly ${filler(29)}` }])
+  equal(result.pages.length, 1)
+  equal(result.pagesWithBannedClaim, 1)
+  equal(result.skipped, 0)
+})
+
+test('a page counts once however many claims it carries', () => {
+  const text = `eco-friendly, carbon neutral, planet-friendly, eco-certified. ${filler(26)}`
+  const result = countPages([{ file: 'many.html', text }])
+  equal(result.pages.length, 1)
+  equal(result.findings, 4, 'findings are counted per hit')
+  equal(result.pagesWithBannedClaim, 1, 'the page was counted more than once')
+})
+
+test('the per-rule table counts pages, not mentions', () => {
+  const result = countPages([{ file: 'repeat.html', text: `eco-friendly eco-friendly eco-friendly ${filler(27)}` }])
+  equal(result.findings, 3, 'mentions')
+  equal(result.byRule.get('generic'), 1, 'pages carrying the rule')
+})
+
+test('the per-rule table lists every rule, including the ones nothing matched', () => {
+  const result = countPages([])
+  equal(result.byRule.size, RULES.length)
+  for (const rule of RULES) equal(result.byRule.get(rule.id), 0, rule.id)
+})
+
+test('the hit rate is over pages read, not files saved', () => {
+  const result = countPages([
+    { file: 'a.html', text: `eco-friendly ${filler(29)}` },
+    { file: 'b.html', text: `Body is 100% recycled aluminium. ${filler(29)}` },
+    { file: 'c.html', text: 'Loading…' },
+  ])
+  equal(result.pages.length, 2, 'pages read')
+  equal(result.skipped, 1, 'files skipped')
+  equal(result.pagesWithBannedClaim, 1)
+  equal(result.bannedRate, 50, 'rate should ignore the skipped file')
+})
+
+// --- one page-text contract, two adapters ---
+
+function textNode (value, skipped) {
+  return {
+    nodeValue: value,
+    parentElement: { closest: selector => (skipped && selector === SKIP_SELECTOR ? {} : null) }
+  }
+}
+
+function stubDocument (nodes) {
+  return {
+    createTreeWalker: () => {
+      let index = 0
+      return { nextNode: () => (index < nodes.length ? nodes[index++] : null) }
+    }
+  }
+}
+
+test('both readers implement one contract', () => {
+  const dom = domText(stubDocument([]))
+  const bytes = bytesText()
+  equal(dom.kind, 'dom')
+  equal(bytes.kind, 'bytes')
+  equal(dom.text(null), '', 'a missing root reads as nothing')
+  equal(bytes.text('<p>Body is recycled aluminium.</p>'), 'Body is recycled aluminium.')
+})
+
+test('the DOM adapter drops text inside a skipped region', () => {
+  const doc = stubDocument([
+    textNode('Our eco-friendly bottle', false),
+    textNode('is carbon neutral', true)
+  ])
+  equal(domText(doc).text({}), 'Our eco-friendly bottle')
+})
+
+test('the two adapters are built from one skip definition', () => {
+  for (const tag of SKIP_TAGS) {
+    assert(SKIP_SELECTOR.includes(tag), `${tag} missing from the DOM selector`)
+    assert(isSkippedElement(tag, ''), `${tag} not skipped for saved bytes`)
+  }
+  for (const attribute of SKIP_ATTRIBUTES) {
+    assert(SKIP_SELECTOR.includes(`[${attribute}]`), `[${attribute}] missing from the DOM selector`)
+    assert(isSkippedElement('div', ` ${attribute}`), `${attribute} not skipped for saved bytes`)
+  }
+  for (const id of SKIP_IDS) {
+    assert(SKIP_SELECTOR.includes(`#${id}`), `#${id} missing from the DOM selector`)
+    assert(isSkippedElement('div', ` id="${id}"`), `${id} not skipped for saved bytes`)
+  }
+  assert(!isSkippedElement('div', ' aria-hidden="true"'), 'aria-hidden text is visible and should be read')
+})
+
+// --- the corpus script itself: files in, exit code and report out ---
+
+const CORPUS_SCRIPT = fileURLToPath(new URL('../scripts/corpus.mjs', import.meta.url))
+
+function withFolder (run) {
+  const dir = mkdtempSync(join(tmpdir(), 'claim-check-'))
+  try {
+    return run(dir)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
+function corpus (...args) {
+  try {
+    const stdout = execFileSync(process.execPath, [CORPUS_SCRIPT, ...args], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe']
+    })
+    return { status: 0, stdout, stderr: '' }
+  } catch (error) {
+    return { status: error.status ?? 1, stdout: String(error.stdout || ''), stderr: String(error.stderr || '') }
+  }
+}
+
+function savePage (folder, name, text) {
+  writeFileSync(join(folder, name), `<!doctype html><html><body><p>${text}</p></body></html>`)
+}
+
+test('corpus script: a page counts once, however many claims it carries', () => withFolder(dir => {
+  savePage(dir, 'many.html', `eco-friendly, carbon neutral, planet-friendly, eco-certified. ${filler(26)}`)
+  const { status, stdout } = corpus(dir, '--json')
+  equal(status, 0)
+  const report = JSON.parse(stdout)
+  equal(report.pagesRead, 1, 'pages read')
+  equal(report.findings, 4, 'findings are counted per hit')
+  equal(report.pagesWithBannedClaim, 1, 'the page was counted more than once')
+}))
+
+test('corpus script: a save under 30 words is skipped, not counted clean', () => withFolder(dir => {
+  savePage(dir, 'cookie-wall.html', 'Loading… please accept cookies. Our eco-friendly bottle is carbon neutral.')
+  const report = JSON.parse(corpus(dir, '--json').stdout)
+  equal(report.pagesRead, 0)
+  equal(report.skipped, 1)
+  equal(report.pagesWithBannedClaim, 0)
+  equal(report.bannedRate, 0)
+
+  const text = corpus(dir).stdout
+  assert(!/\bclean\b/.test(text), 'a skipped save was reported as a clean page')
+  assert(/1 skipped as too short to be a page/.test(text), text)
+}))
+
+test('corpus script: the per-rule table counts a page once per rule', () => withFolder(dir => {
+  savePage(dir, 'repeat.html', `eco-friendly eco-friendly eco-friendly ${filler(27)}`)
+  const report = JSON.parse(corpus(dir, '--json').stdout)
+  equal(report.findings, 3, 'mentions')
+  equal(report.byRule.generic, 1, 'pages carrying the rule')
+
+  const text = corpus(dir).stdout
+  assert(/^\s*1 pages\s+banned\s+generic$/m.test(text), text)
+}))
+
+test('corpus script: claims inside a data-scan-skip region are not counted', () => withFolder(dir => {
+  writeFileSync(join(dir, 'quoted.html'), `<!doctype html><html><body>
+    <div data-scan-skip><p>Our eco-friendly bottle is carbon neutral.</p></div>
+    <p>${filler(30)}</p>
+  </body></html>`)
+  const report = JSON.parse(corpus(dir, '--json').stdout)
+  equal(report.pagesRead, 1, 'the page itself is read')
+  equal(report.findings, 0, 'text the bookmarklet skips was counted')
+}))
+
+test('corpus script: a folder path with a space still runs', () => withFolder(dir => {
+  const spaced = join(dir, 'saved pages')
+  mkdirSync(spaced)
+  savePage(spaced, 'one.html', `eco-friendly ${filler(29)}`)
+  const { status, stdout } = corpus(spaced, '--json')
+  equal(status, 0, 'the path guard skipped main() for a path with a space')
+  equal(JSON.parse(stdout).pagesRead, 1)
+}))
+
+test('corpus script: a missing folder exits 1 and points at the docs', () => withFolder(dir => {
+  const { status, stderr } = corpus(join(dir, 'not-saved-yet'))
+  equal(status, 1)
+  assert(stderr.includes('no such folder'), stderr)
+  assert(stderr.includes('README.md'), stderr)
+}))
+
+test('corpus script: a folder with no page files exits 1', () => withFolder(dir => {
+  writeFileSync(join(dir, 'notes.png'), 'not a page')
+  const { status, stderr } = corpus(dir)
+  equal(status, 1)
+  assert(stderr.includes('No .html, .htm or .txt files'), stderr)
+}))
 
 console.log(`\n${passed} passed, ${failed} failed`)
 process.exit(failed === 0 ? 0 : 1)

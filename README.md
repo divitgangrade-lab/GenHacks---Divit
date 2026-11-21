@@ -18,24 +18,50 @@ Yet most shop pages still carry them. Claim Check reads the page, finds those cl
 ```
 src/rules.js   the rule set: pattern, plain-English reading, citation, evidence
 src/scan.js    pure functions: text in, findings out (no DOM, no network)
+src/text.js    page text: one skip definition, a DOM adapter and a bytes adapter
+src/corpus.js  the counting rules for a corpus run
 src/escape.js  HTML escaping, shared by both renderers
 report.js      bookmarklet entry: reads the page, renders the panel in a shadow root
 app.js         the demo page, and its own renderer
-tests/run.mjs  21 assertions against the scanner
+showroom/      the 50-component React Bits showroom (Vite + React, its own deps)
+motion/        the showroom's built output, committed for GitHub Pages
+tests/run.mjs  42 assertions against the scanner, page text and the corpus script
 scripts/corpus.mjs  the same scanner over a folder of saved product pages
 ```
 
 The decision layer is pure and testable. The demo page and the floating panel share it, through two small renderers.
 
+### Marking commentary out of a scan
+
+Text that quotes a banned phrase on purpose — this site's own rule table, a review, another checker — can be put inside an element marked `data-scan-skip`. Both readers drop that element and everything inside it, so the scan reports the product, not the commentary:
+
+```html
+<section data-scan-skip>
+  <p>"Our eco-friendly bottle is carbon neutral." — quoted in a review</p>
+</section>
+```
+
+Nothing has to be marked on a shop page: an unmarked page is read in full. The same skip list also drops `script`, `style`, `noscript`, `template`, `svg`, `iframe` and `hidden` elements, so markup and invisible text are never counted.
+
+### The motion showroom
+
+`showroom/` is a separate Vite + React app holding 50 React Bits components, fetched as source from the registry and mounted one per tile. Build it with `npm run build:showroom`; the output in `motion/` is committed so GitHub Pages serves it without a build step. The component files are vendored under React Bits' MIT + Commons Clause licence, by David Haz, and are used as fetched rather than rewritten.
+
 ## Run it
 
-No build step, no install, no key.
+The Claim Check page itself is still dependency-free: `index.html`, `styles.css`, `app.js`, `report.js` and `src/` are plain ES modules, with no build step and no key. `npm test`, `npm run serve` and `npm run corpus` need Node and nothing else.
+
+The motion showroom is the exception. It is a Vite + React app in `showroom/` with its own dependencies:
 
 ```bash
-npm test          # 21 assertions
-npm run serve     # http://localhost:3000
-npm run corpus    # hit rate over saved pages, see below
+npm install              # once, for the showroom only
+npm run build:showroom   # writes motion/
+npm test          # 42 assertions, no dependencies needed
+npm run serve            # http://localhost:3000
+npm run corpus           # hit rate over saved pages, see below
 ```
+
+`package-lock.json` is committed, so `npm ci` reproduces the same dependency tree. The built `motion/` output is committed as well: after editing the showroom, rebuild it, or Pages keeps serving the old bundle.
 
 Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt.
 
@@ -66,7 +92,7 @@ The method, so the number can be argued with:
 4. **Skip the unreadable.** The script drops any save under 30 words, which catches a cookie wall or a save that failed halfway, and reports it as skipped rather than as clean. Counting those as clean would flatter the result.
 5. **Report the sample with the number.** Say how many pages, from where, saved on what date, and which commit the scanner ran at. The script prints the commit itself.
 
-A saved page becomes text differently from the bookmarklet. The browser version walks the live DOM and skips marked regions. The corpus version has only bytes, so it drops comments, `script`, `style`, `noscript`, `template`, `svg` and `iframe` blocks, strips the remaining tags, decodes entities and collapses whitespace. Everything after that is one shared code path, and every pattern, guard, citation and severity comes from the same two files.
+A saved page and a live page are read by the same definition of visible text, in `src/text.js`: one skip definition (`data-scan-skip`, the panel's own output, `hidden`, and non-prose elements such as `script`, `style`, `svg` and `template`) behind two adapters, `domText` for a live DOM and `bytesText` for a saved file, which share the same contract. The browser walks the text nodes of the page; the corpus has only bytes, so it drops marked regions by tag depth, ignores `<head>` and its `<title>`, strips the remaining tags, decodes entities and collapses whitespace. Both then call the same `scan()`, so the same page gives the same findings either way. The counting rules — a page counts once, a rule counts a page once however often it is mentioned, saves under 30 words are skipped rather than counted clean — live in `src/corpus.js` and are tested.
 
 The number therefore cannot see copy rendered by JavaScript after load, words inside attributes such as `alt` and `title`, text baked into images and badges, pages behind a consent wall, or any language other than English. It is a lower bound on a hand-picked sample, not a survey of EU e-commerce.
 

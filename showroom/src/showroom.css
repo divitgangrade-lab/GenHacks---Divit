@@ -78,6 +78,11 @@ h1 {
 
 .tile__stage > * { max-width: 100%; }
 
+/* LogoLoop's horizontal track is max-content. As a grid item its min-content
+   size would otherwise widen the stage's auto column with every copy, and the
+   width it measures is what decides the copy count, so it never converges. */
+.tile__stage > .logoloop { min-width: 0; }
+
 .tile__name {
   position: absolute; left: .6rem; bottom: .45rem;
   font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
@@ -140,6 +145,13 @@ h1 {
 .demo--blur { width: 100%; height: 100%; display: grid; place-items: center; }
 
 .tile__fail { color: #e76f51; font-size: .76rem; text-align: center; padding: 0 1rem; }
+
+/* Page-level cursor effects fill their parent; this gives them the viewport
+   rather than the section's content box. */
+.cursor-layer { position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
+
+/* Shredder's items sit in a fixed-height slot list, not a full-height box. */
+.demo--slip { height: 32px; font-size: .78rem; }
 
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }

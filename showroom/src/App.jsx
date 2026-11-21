@@ -22,6 +22,23 @@ const LOGO_ITEMS = ['Claim', 'Check', 'Offsets'].map(word => ({
   title: word
 }))
 
+// A dock tile draws only item.icon; the label is its tooltip and menu title, so
+// without an icon the tile is an empty rounded square.
+const dockIcon = children => (
+  <svg
+    viewBox="0 0 16 16" width="1em" height="1em" fill="none" stroke="currentColor"
+    strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+  >
+    {children}
+  </svg>
+)
+
+const DOCK_ITEMS = [
+  { label: 'Check a claim', icon: dockIcon(<><circle cx="7" cy="7" r="4.2" /><path d="M10.2 10.2 14 14" /></>) },
+  { label: 'Review the evidence', icon: dockIcon(<><path d="M3 8.4 6.4 12 13 4.5" /></>) },
+  { label: 'Read the sources', icon: dockIcon(<><path d="M4 2.5h8v11H4z" /><path d="M6 6h4M6 8.5h4M6 11h2.5" /></>) }
+]
+
 class Boundary extends Component {
   constructor (props) {
     super(props)
@@ -117,24 +134,40 @@ const SCROLL_TILES = [
 
 const SURFACE_TILES = [
   { name: 'ClickSpark', node: <RB.ClickSpark><button className="demo demo--button" type="button">Click anywhere</button></RB.ClickSpark> },
-  { name: 'Dock', node: <RB.Dock items={[{ label: 'One' }, { label: 'Two' }, { label: 'Three' }]} /> },
+  { name: 'Dock', node: <RB.Dock items={DOCK_ITEMS} /> },
   { name: 'ElectricBorder', node: <RB.ElectricBorder><div className="demo demo--box">Live border</div></RB.ElectricBorder> },
   { name: 'FlexCarousel', node: <RB.FlexCarousel /> },
   { name: 'GlareHover', node: <RB.GlareHover height="120px" width="180px"><div className="demo demo--box">Glare</div></RB.GlareHover> },
   { name: 'GradualBlur', node: <div className="demo demo--blur">Blurred edge</div> },
   { name: 'ImageTrail', node: <RB.ImageTrail items={[swatch('#7df9ff'), swatch('#f4a261'), swatch('#e76f51')]} /> },
-  // Vertical: the horizontal geometry recomputes its copy count until React
-  // aborts with "maximum update depth exceeded" in a tile this narrow. The
-  // vertical path measures its parent and settles. See the tile count test.
-  { name: 'LogoLoop', node: <RB.LogoLoop logos={LOGO_ITEMS} direction="down" hoverSpeed={0} /> },
+  // Horizontal is the real usage. The stage is a grid whose auto column takes its
+  // minimum from the loop's max-content track, so the column grew with every
+  // copy the engine added, which grew the width it measured, which asked for more
+  // copies (React error 185). `.tile__stage > .logoloop` in showroom.css bounds
+  // that width; without it the copy count never settles in a narrow tile.
+  { name: 'LogoLoop', node: <RB.LogoLoop logos={LOGO_ITEMS} direction="left" hoverSpeed={0} /> },
   { name: 'Magnet', node: <RB.Magnet><span className="demo demo--chip">Magnet</span></RB.Magnet> },
   { name: 'MorphSlider', node: <RB.MorphSlider /> },
   { name: 'MicroSlats', node: <RB.MicroSlats /> },
   { name: 'RubberSegment', node: <Segmented /> },
-  { name: 'Shredder', node: <RB.Shredder items={['One', 'Two', 'Three']} renderItem={item => <div className="demo demo--sheet">{item}</div>} /> },
+  {
+    name: 'Shredder',
+    node: (
+      <RB.Shredder
+        items={[{ id: 'one', label: 'One' }, { id: 'two', label: 'Two' }, { id: 'three', label: 'Three' }]}
+        renderItem={item => <div className="demo demo--sheet demo--slip">{item.label}</div>}
+        height={144}
+        fallHeight={24}
+        gap={6}
+        inset={8}
+      />
+    )
+  },
   { name: 'SquishSwitch', node: <Switch /> },
+  // The cards are inset so the fan has room to show the ones underneath. At
+  // full bleed every offset lands outside the tile and only the top card shows.
   { name: 'Stack', node: <RB.Stack cards={['#7df9ff', '#f4a261', '#e76f51', '#f4f1ea'].map((color, index) => (
-    <div key={color} className="demo demo--sheet" style={{ background: color, color: '#0c0b0f', fontSize: '1.6rem' }}>{index + 1}</div>
+    <div key={color} className="demo demo--sheet" style={{ width: '86%', height: '86%', margin: '7%', background: color, color: '#0c0b0f', fontSize: '1.6rem' }}>{index + 1}</div>
   ))} /> },
   { name: 'WarmTooltip', node: <RB.WarmTooltip content="Every claim needs a citation"><button className="demo demo--button" type="button">Hover me</button></RB.WarmTooltip> }
 ]
@@ -154,8 +187,10 @@ const CANVAS_TILES = [
 
 const CURSOR_TILES = [
   { name: 'Crosshair', node: <RB.Crosshair /> },
-  { name: 'GhostCursor', node: <RB.GhostCursor /> },
-  { name: 'GlowCursor', node: <RB.GlowCursor /> },
+  // Both size themselves to their parent, and are meant to sit over the whole
+  // page. The layer below gives them the viewport instead of a section box.
+  { name: 'GhostCursor', node: <RB.GhostCursor />, layer: true },
+  { name: 'GlowCursor', node: <RB.GlowCursor />, layer: true },
   { name: 'TargetCursor', node: <RB.TargetCursor /> }
 ]
 
@@ -196,7 +231,13 @@ function Cursors () {
           </button>
         ))}
       </div>
-      {chosen ? <Boundary name={chosen.name}>{chosen.node}</Boundary> : <p className="cursor-hint">No cursor mounted.</p>}
+      {chosen ? (
+        <div className={chosen.layer ? 'cursor-layer' : undefined}>
+          <Boundary name={chosen.name}>{chosen.node}</Boundary>
+        </div>
+      ) : (
+        <p className="cursor-hint">No cursor mounted.</p>
+      )}
     </section>
   )
 }
@@ -223,7 +264,7 @@ export default function App () {
       </Section>
 
       <Section title="Surfaces" count={SURFACE_TILES.length}>
-        {SURFACE_TILES.map(({ name, node }) => <Tile key={name} name={name}>{node}</Tile>)}
+        {SURFACE_TILES.map(({ name, node, tall }) => <Tile key={name} name={name} tall={tall}>{node}</Tile>)}
       </Section>
 
       <Section title="Canvas" count={CANVAS_TILES.length}>
