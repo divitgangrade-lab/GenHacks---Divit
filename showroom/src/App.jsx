@@ -224,6 +224,7 @@ function Cursors () {
           <button
             key={tile.name}
             type="button"
+            className="cursor-target"
             aria-pressed={active === tile.name}
             onClick={() => setActive(current => current === tile.name ? null : tile.name)}
           >
@@ -248,7 +249,7 @@ export default function App () {
       <p className="kicker">Claim Check · supporting page</p>
       <div className="top">
         <h1>Motion showroom</h1>
-        <a className="back" href="../">Back to Claim Check</a>
+        <a className="back cursor-target" href="../">Back to Claim Check</a>
       </div>
       <p className="lede">
         Fifty components from <a href="https://reactbits.dev" rel="noopener noreferrer">React Bits</a>, fetched as source from its registry and
@@ -264,7 +265,7 @@ export default function App () {
       </Section>
 
       <Section title="Surfaces" count={SURFACE_TILES.length}>
-        {SURFACE_TILES.map(({ name, node, tall }) => <Tile key={name} name={name} tall={tall}>{node}</Tile>)}
+        {SURFACE_TILES.map(({ name, node }) => <Tile key={name} name={name}>{node}</Tile>)}
       </Section>
 
       <Section title="Canvas" count={CANVAS_TILES.length}>
