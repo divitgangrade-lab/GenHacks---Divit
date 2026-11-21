@@ -430,7 +430,8 @@ corpus/pages/
 
 # The film master and its render parts are build output
 claim-check-film/out/
-claim-check-film/claim-check*.mp4
+# the 4K master is over GitHub's 100 MB file limit; the 1080p copy is tracked so it can be viewed
+claim-check-film/claim-check.mp4
 claim-check-film/raw/
 .tools/
 .lemo-setup.sh
