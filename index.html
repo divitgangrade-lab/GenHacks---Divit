@@ -3,87 +3,65 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Discharge Rx — a discharge letter you can actually follow</title>
-  <meta name="description" content="Turns a hospital discharge letter into a plain-language plan, then checks that no instruction was lost before showing it.">
+  <title>Claim Check — which green claims are actually banned</title>
+  <meta name="description" content="Since 27 September 2026, generic environmental claims are blacklisted in the EU. Claim Check marks them on the page you are shopping on, and names the rule.">
   <meta name="color-scheme" content="light">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to the tool</a>
+  <a class="skip" href="#demo">Skip to the checker</a>
 
-  <header class="masthead">
+  <header class="masthead" data-scan-skip>
     <p class="kicker">GenHacks 2026 · Healthcare &amp; Environmental</p>
-    <h1>Discharge Rx</h1>
-    <p class="lede">A discharge letter becomes a plan you can follow, and every instruction in the original is checked before the plan is allowed out.</p>
+    <h1>Claim Check</h1>
+    <p class="lede">On 27 September 2026, the EU blacklisted generic green claims. This marks them on the page you are shopping on, and names the rule each one breaks.</p>
   </header>
 
-  <main id="main" class="layout">
-    <section class="panel panel--input" aria-labelledby="letter-heading">
-      <div class="panel__head">
-        <h2 id="letter-heading">The letter</h2>
-        <div class="samples" id="samples" role="group" aria-label="Sample letters"></div>
-      </div>
+  <section class="install" aria-labelledby="install-heading" data-scan-skip>
+    <h2 id="install-heading">Use it on a real page</h2>
+    <p>Drag this button to your bookmarks bar. On any product page, click it. Nothing is sent anywhere: the check runs in the page you are already on.</p>
+    <p class="install__row">
+      <a class="bookmarklet" id="bookmarklet" href="#" draggable="true">Check this page</a>
+      <span class="install__note" id="bookmarklet-url">Building the bookmarklet…</span>
+    </p>
+    <p class="hint">Bookmarklets do not work on browser-internal pages, and some sites block them. If one does, paste the address from the box above into the page instead. Run it on this page and it will also flag the rule table below, which quotes the banned phrases on purpose.</p>
+  </section>
 
-      <label class="field__label" for="letter">Paste a discharge letter or medication list</label>
-      <textarea id="letter" class="letter" spellcheck="false" autocomplete="off" rows="16"></textarea>
-
-      <p class="notice" id="notice" hidden role="status"></p>
-
-      <div class="actions">
-        <button type="button" class="btn btn--primary" id="simplify">Make it plain</button>
-        <button type="button" class="btn" id="stress">Test the checker</button>
-        <button type="button" class="btn btn--quiet" id="clear">Clear</button>
-      </div>
-      <p class="hint">Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run. Nothing leaves this page: every step runs in your browser.</p>
+  <main class="layout">
+    <section class="panel" aria-labelledby="product-heading">
+      <p class="panel__label">A page to check</p>
+      <article id="fixture" class="product">
+        <h2 id="product-heading">Fern &amp; Fold Bamboo Bottle</h2>
+        <p class="product__price">£28 · 750 ml</p>
+        <p>Our eco-friendly bottle is carbon neutral and packaged in biodegradable wrap. Every order is eco-certified by our own sustainability team, so you can go green without thinking about it.</p>
+        <p>We are proud to be net zero by 2040.</p>
+        <p class="product__aside">Pairs well with green tea and green beans.</p>
+      </article>
+      <p class="hint">Synthetic copy, written for this demo. The last line is a decoy: "green tea" is not an environmental claim.</p>
     </section>
 
-    <section class="panel panel--result" id="result" hidden aria-labelledby="result-heading">
-      <h2 id="result-heading" class="sr-only">Result</h2>
-
-      <div class="verdict" id="verdict" aria-live="polite"></div>
-
-      <div class="score" id="score"></div>
-
-      <div class="plan" id="plan"></div>
-
-      <div class="schedule" id="schedule" hidden>
-        <h3 class="block__title">One day at a glance</h3>
-        <ul class="schedule__list" id="schedule-list"></ul>
-      </div>
-
-      <div class="actions actions--result" id="actions" hidden>
-        <button type="button" class="btn" id="ics">Download calendar</button>
-        <button type="button" class="btn" id="copy">Copy the plan</button>
-        <button type="button" class="btn btn--quiet" id="print">Print</button>
-      </div>
-
-      <div class="stress" id="stress-out" hidden aria-live="polite"></div>
+    <section class="panel panel--result" aria-labelledby="result-heading">
+      <p class="panel__label">What the checker finds</p>
+      <h2 id="result-heading" class="sr-only">Findings</h2>
+      <p class="verdict" id="verdict" aria-live="polite"></p>
+      <ul class="findings" id="findings" data-scan-skip></ul>
+      <p class="hint" id="scanned"></p>
     </section>
   </main>
 
-  <section class="method" aria-labelledby="method-heading">
-    <h2 id="method-heading">What happens to your letter</h2>
-    <ol class="method__list">
-      <li><strong>Read.</strong> A rules-based parser pulls out medicines, doses, appointments and warnings. No model decides what your letter said.</li>
-      <li><strong>Rewrite.</strong> Each instruction is rendered in short sentences, with clinical shorthand swapped for everyday words.</li>
-      <li><strong>Check.</strong> Every dose, date, drug name and clinical warning in the original must appear in the rewrite. If one is missing, the plan is blocked.</li>
-      <li><strong>Carry through.</strong> Anything the parser does not recognise is kept in the original words rather than guessed at.</li>
-    </ol>
-    <p class="method__note">Why it matters: 81% of 1,511 discharge documents sit above the sixth-grade reading level doctors are told to aim for, and 100% do on SMOG. Comprehension errors go on to predict adherence errors. Lowering the reading level cut post-discharge phone calls from 21.9% to 9.0% and readmissions from 1.9% to 0.9% per 100 patients in one study.</p>
+  <section class="rules" aria-labelledby="rules-heading" data-scan-skip>
+    <h2 id="rules-heading">The five rules this checks</h2>
+    <ol class="rules__list" id="rules-list"></ol>
+    <p class="rules__note">Informational, not legal advice. Enforcement is national: the directive had to be transposed by 27 March 2026 and applies from 27 September 2026.</p>
   </section>
 
-  <footer class="site-foot">
-    <p>Sample letters are synthetic. No patient data. This is a demonstration, not medical advice: always follow the instructions your own care team gave you.</p>
-    <p class="site-foot__links">
-      <a href="https://www.amjmed.com/article/S0002-9343(25)00196-2/fulltext">Readability of discharge instructions (2025)</a>
-      <a href="https://www.jpeds.com/article/S0022-3476(19)30535-9/abstract">Comprehension and adherence errors (2019)</a>
-      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0039606018307268">Readability and readmissions (2019)</a>
-      <a href="https://academic.oup.com/intqhc/article/38/4/mzag133/8792929">AI discharge letters (2026)</a>
-    </p>
+  <footer class="site-foot" data-scan-skip>
+    <p>Read the sources directly: <a href="https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng">Directive (EU) 2024/825</a> and the <a href="https://commission.europa.eu/document/download/3c257883-bb2a-4dd9-a6dc-501d587bb34f_en">Commission's questions and answers</a>.</p>
+    <p>Motion work lives on its own page: <a href="./motion/">the React Bits showroom</a>, 50 components fetched from the registry.</p>
   </footer>
 
   <script type="module" src="./app.js"></script>
-  <noscript><p class="noscript">This tool needs JavaScript. Everything runs locally in your browser.</p></noscript>
+  <noscript><p class="noscript">This checker needs JavaScript. Everything runs locally in your browser.</p></noscript>
 </body>
 </html>

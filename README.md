@@ -1,85 +1,56 @@
-# Discharge Rx
+# Claim Check
 
-A hospital discharge letter becomes a plan you can follow, and every instruction in the original is checked before the plan is allowed out.
+**Marks the environmental claims that are now illegal, on the page you are shopping on.**
 
-Built for GenHacks 2026, Healthcare & Environmental track. Runs entirely in the browser, with no dependencies, no API keys and no build step.
+Since 27 September 2026, Directive (EU) 2024/825 has blacklisted generic green claims across the EU. "Eco-friendly", "climate neutral", "biodegradable" and the word "green" itself are banned unless the seller can show recognised excellent environmental performance. The rules apply to stock already on shelves, not just new products.
 
-**[Open the live demo](https://divitgangrade-lab.github.io/GenHacks---Divit/)**
+Yet most shop pages still carry them. Claim Check reads the page, finds those claims, and names the rule each one breaks and the evidence that would make it legal.
 
-## The problem
+## Why this, and not another carbon calculator
 
-A patient leaves hospital with a letter written for clinicians, and is expected to follow it at home. In a review of 1,511 discharge documents, 81% sat above the sixth-grade reading level the American Medical Association recommends, and 100% did on SMOG — and the readability had not improved over the period the documents were revised. Comprehension errors then go on to predict adherence errors.
+- **The rule already exists.** No estimation, no emission factors to argue about: a specific law names specific phrases, with a citation each.
+- **The failure is visible in one second.** One click on a real product page and the claims light up.
+- **It runs client-side.** The page text never leaves the browser, so it is safe on a checkout page.
+- **It is a check, not a rewrite.** Every finding quotes the exact words and the article, so a reader can disagree with it in public.
 
-The gap this project aims at is not "rewrite the letter". That has been tried: AI-generated discharge letters beat traditional ones on comprehension in a 2026 trial (median 4 vs 2) **but did not improve identification of follow-up appointment dates**. The unsolved part is making sure the rewrite still says everything the original said.
+## How it works
 
-So the product is the check, not the sentence.
+```
+src/rules.js   the rule set: pattern, plain-English reading, citation, evidence
+src/scan.js    pure functions: text in, findings out (no DOM, no network)
+src/panel.js   renders findings into a shadow root, immune to page CSS
+report.js      bookmarklet entry: scan the page you are on
+app.js         the demo page
+tests/run.mjs  14 assertions against the scanner
+```
 
-## What it does
-
-1. **Reads** the letter with a rules-based parser: medicines, doses, frequencies, durations, appointments, restrictions and warning signs. No model decides what the letter said, so the same input always yields the same instruction set.
-2. **Rewrites** each instruction into short sentences, replacing clinical shorthand with everyday words (`PO` → by mouth, `TID` → three times a day, `ETOH` → alcohol).
-3. **Checks** the rewrite against the original. Every dose, date, drug name and clinical warning must survive. If one is missing, the plan is blocked and the missing fact is named.
-4. **Carries through** anything the parser does not recognise, in the original words, rather than guessing.
-5. **Exports** a calendar file with appointments and repeating dose reminders, and prints as a one-page plan.
-
-## The check, which is the point
-
-Each instruction gets a set of anchors: numbers with units, dates, drug names, and a short list of clinical words whose disappearance would be dangerous (warfarin, bleeding, driving, 911). The rewrite passes only if every anchor is present, either word for word or through the plain-language glossary.
-
-The demo includes a **checker test** that deletes a sentence from the finished plan and runs the same check against it. It names what was lost. That is the failure the tool exists to prevent, shown working.
-
-## Measured results
-
-Reproduce with `node scripts/eval.mjs`.
-
-| Letter | FKGL | SMOG | Instructions | Facts checked | Meds | Appointments | Warnings | Verdict |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Clean letter | 4.8 → 4.4 | 8.4 → 8.7 | 10 | 26 | 3 | 1 | 3 | all kept |
-| Abbreviation soup | 4.1 → 5.3 | 7.4 → 8.8 | 12 | 18 | 3 | 1 | 2 | all kept |
-| Unusual instruction | 4.5 → 4.3 | 8.1 → 8.4 | 9 | 18 | 2 | 1 | 3 | all kept |
-
-Read that table carefully, because it contains the most useful thing this project learned: **the readability score barely moves, and on one letter it gets worse.**
-
-The reason is that these letters are lists of short lines, and Flesch-Kincaid rewards short lines. The "abbreviation soup" letter scores 4.1 while being completely unreadable to a patient, because `Amox 500mg PO TID x7d` is made of short words. Expanding that shorthand into "for 7 days" adds syllables, so the grade level rises even though the plan is far easier to act on.
-
-So the honest claim is not a grade-level drop. It is: **on the clean letter, 26 facts in and 26 facts out, verified; on the abbreviation letter, 17 pieces of clinical shorthand replaced, three medicines turned into four timed doses, and a calendar file exported.** Grade level is a weak proxy and this project shows where it breaks.
-
-## What it does not do
-
-- **Narrative discharge summaries.** The parser expects one instruction per line or sentence. A paragraph containing two medicines in one sentence will lose one, so the tool reports what it could not parse rather than pretending.
-- **Date ambiguity.** `12/2/2026` is read as 2 December (month first). European order would invert it. A real deployment needs locale detection.
-- **Clinical judgement.** It does not check whether a dose is correct or a drug is appropriate. It only checks that nothing was lost.
-- **Real patient data.** Every sample letter is synthetic and written for this demo.
-- **A complete glossary.** 71 terms. Anything outside it is carried through unchanged, which is safe but less plain.
+The split matters: the decision layer is pure and testable, and the two renderers (inline in the demo, floating panel on a live page) share it.
 
 ## Run it
 
+No build step, no install, no key.
+
 ```bash
-npm test        # 23 assertion tests, no dependencies
-npm run serve   # http://localhost:4173
+npm test          # 14 assertions
+npm run serve     # http://localhost:3000
 ```
 
-Or open `index.html` through any static server. There is no build step: the browser loads `app.js` and the ES modules in `src/` directly.
+Drag **Check this page** from the demo onto your bookmarks bar, then click it on any product page. The bookmarklet loads `report.js` as a module from wherever the site is served, so it needs no store listing and no permissions prompt.
 
-## How it is built
+## What it will not do
 
-Plain HTML, CSS and ES modules. No framework, no package dependencies, no network calls, no runtime AI model.
+- **It cannot see images.** A leaf logo with no text is invisible to it, and soft claims like "kinder to the planet" are not in the blacklist yet.
+- **It does not judge the product.** It flags wording, not facts: a page can break the rules while being genuinely green, and the reverse is also true.
+- **It is English-only, and EU-only.** The UK and US have different regimes.
+- **It is not legal advice**, and it does not know whether a national authority has started enforcing.
 
-- `src/readability.js` — Flesch-Kincaid, SMOG and Flesch Reading Ease, implemented here so the numbers on screen can be traced to code.
-- `src/extract.js` — the rules-based parser and the anchor builder.
-- `src/render.js` — the plain-language renderer and the glossary.
-- `src/verify.js` — the fidelity check.
-- `src/ics.js` — the calendar export.
-- `tests/run.mjs` — assertions, including the two cases that must fail.
+These are limits of a text check, not bugs to fix later.
 
-An earlier design note proposed Next.js and a Deployxa deployment. The shipped build is dependency-free static files instead, so it runs on GitHub Pages with nothing to install and nothing to break during a demo. The design note is in `docs/superpowers/specs/`.
+## Next
 
-Written with AI assistance (Freebuff). No third-party libraries, APIs, templates or generated code assets are bundled: every file in this repository was written for it.
+- A rule editor so a lawyer can add a phrase without touching code.
+- Flag a page's claim density across a whole category, to show which brands lean on wording instead of evidence.
 
-## Sources
+Sources: [Directive (EU) 2024/825](https://eur-lex.europa.eu/eli/dir/2024/825/oj/eng) and the [Commission's Q&A](https://commission.europa.eu/document/download/3c257883-bb2a-4dd9-a6dc-501d587bb34f_en).
 
-- [Language and readability barriers in discharge instructions, Am J Med 2025](https://www.amjmed.com/article/S0002-9343(25)00196-2/fulltext)
-- [Discharge instruction comprehension and adherence errors, J Pediatr 2019](https://www.jpeds.com/article/S0022-3476(19)30535-9/abstract)
-- [Enhanced readability and readmissions, Surgery 2019](https://www.sciencedirect.com/science/article/abs/pii/S0039606018307268)
-- [Comprehension of an AI-generated discharge letter, IJQHC 2026](https://academic.oup.com/intqhc/article/38/4/mzag133/8792929)
-- [Hospital discharge instructions: comprehension among older adults, JGIM 2012](https://pmc.ncbi.nlm.nih.gov/articles/PMC4238191)
+Built for GenHacks 2026. Written with AI assistance (Freebuff).

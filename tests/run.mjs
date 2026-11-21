@@ -1,218 +1,121 @@
-// Assertion tests for the pipeline. No dependencies: `node tests/run.mjs`.
-import assert from 'node:assert/strict'
-import { analyse, syllables } from '../src/readability.js'
-import { extract } from '../src/extract.js'
-import { render } from '../src/render.js'
-import { verify, removeFirstMedication, normalise } from '../src/verify.js'
-import { buildIcs } from '../src/ics.js'
-import { SAMPLES } from '../src/samples.js'
+// Run with: npm test   (or: node tests/run.mjs)
+// No dependencies, no browser. The scanner is pure, so it is tested directly.
+
+import { scan, summarise, verdictLine } from '../src/scan.js'
+import { RULES, ruleById } from '../src/rules.js'
 
 let passed = 0
-const failures = []
+let failed = 0
 
 function test (name, fn) {
   try {
     fn()
     passed += 1
+    console.log(`ok    ${name}`)
   } catch (error) {
-    failures.push({ name, message: error.message })
+    failed += 1
+    console.log(`FAIL  ${name}\n      ${error.message}`)
   }
 }
 
-const sample = id => SAMPLES.find(s => s.id === id)
-
-test('syllables handles common words', () => {
-  assert.equal(syllables('a'), 1)
-  assert.equal(syllables('day'), 1)
-  assert.equal(syllables('tablet'), 2)
-  assert.ok(syllables('medication') >= 3, `medication -> ${syllables('medication')}`)
-  assert.ok(syllables('hospitalisation') > syllables('hospital'))
-})
-
-test('a plainly written sentence scores lower than a clinical one', () => {
-  const plain = analyse('Take one tablet by mouth two times a day. Call us if you feel sick.')
-  const clinical = analyse(
-    'Amoxicillin 500 mg PO TID x 7 days; acetaminophen 500 mg PO Q6H PRN for analgesia, with subsequent reassessment of the incision for evidence of erythema or purulent discharge.'
-  )
-  assert.ok(plain.fkgl < clinical.fkgl, `${plain.fkgl} !< ${clinical.fkgl}`)
-  assert.ok(plain.fre > clinical.fre)
-})
-
-test('analyser never divides by zero on empty input', () => {
-  const result = analyse('')
-  assert.ok(Number.isFinite(result.fkgl))
-  assert.ok(Number.isFinite(result.smog))
-})
-
-test('clean letter: three medications with the right shape', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  assert.equal(extraction.medications.length, 3, 'three medications')
-  const amoxicillin = extraction.medications.find(m => /amoxicillin/i.test(m.drug))
-  assert.ok(amoxicillin, 'found amoxicillin')
-  assert.equal(amoxicillin.strength, '500 mg')
-  assert.equal(amoxicillin.frequency.perDay, 3)
-  assert.equal(amoxicillin.duration.days, 7)
-})
-
-test('as-needed medicine gets no fixed schedule', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  const pain = extraction.medications.find(m => /acetaminophen/i.test(m.drug))
-  assert.ok(pain.frequency.times.length === 0, 'PRN must not be given fixed times')
-})
-
-test('appointment date is parsed to ISO', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  assert.equal(extraction.appointments.length, 1)
-  assert.equal(extraction.appointments[0].date, '2026-12-02')
-})
-
-test('restrictions and red flags are separated', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  assert.ok(extraction.restrictions.length >= 3, `got ${extraction.restrictions.length}`)
-  assert.ok(extraction.redFlags.length >= 3, `got ${extraction.redFlags.length}`)
-})
-
-test('numbered lists do not leak their marker', () => {
-  const extraction = extract(sample('messy').text, { baseDate: '2026-11-20' })
-  assert.ok(!extraction.all.some(i => /^\d+[.)]$/.test(i.raw)), 'no bare list numbers')
-})
-
-test('echoed jargon survives verification through the glossary', () => {
-  const extraction = extract(sample('messy').text, { baseDate: '2026-11-20' })
-  const rendered = render(extraction)
-  const result = verify(extraction, rendered.text)
-  assert.deepEqual(result.problems, [], JSON.stringify(result.problems, null, 2))
-})
-
-test('the hold-warfarin instruction is not swallowed', () => {
-  const extraction = extract(sample('messy').text, { baseDate: '2026-11-20' })
-  const found = extraction.all.find(i => /hold warfarin/i.test(i.raw))
-  assert.ok(found, 'the instruction was extracted somewhere')
-})
-
-test('plain plan keeps every anchor and never raises the grade level', () => {
-  for (const letter of SAMPLES) {
-    const extraction = extract(letter.text, { baseDate: '2026-11-20' })
-    const rendered = render(extraction)
-    const before = analyse(letter.text)
-    const after = analyse(rendered.text)
-    const result = verify(extraction, rendered.text)
-    assert.ok(result.ok, `${letter.id}: ${JSON.stringify(result.problems)}`)
-    // The product promise is a plan at or below the sixth-grade target, not
-    // "a lower number than before". Expanding shorthand adds syllables, so a
-    // letter written in shorthand can score higher afterwards while being far
-    // easier to act on. Grade level rewards brevity, not understanding.
-    assert.ok(after.fkgl <= 6, `${letter.id}: plain plan sits at grade ${after.fkgl}`)
-    if (before.fkgl > 6) {
-      assert.ok(after.fkgl < before.fkgl, `${letter.id}: ${after.fkgl} !< ${before.fkgl}`)
-    }
-  }
-})
-
-test('the plain plan leaves no clinical abbreviations behind', () => {
-  for (const letter of SAMPLES) {
-    const rendered = render(extract(letter.text, { baseDate: '2026-11-20' }))
-    assert.doesNotMatch(
-      rendered.text,
-      /\b(PO|TID|QID|BID|Q\d+H|QHS|QAM|NPO|PRN|ETOH|APAP|DC|FU)\b/i,
-      `${letter.id} still contains shorthand`
-    )
-  }
-})
-
-test('verifier blocks a rewrite that dropped a medication', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  const rendered = render(extraction)
-  const lossy = removeFirstMedication(rendered.text, extraction)
-  const result = verify(extraction, lossy)
-  assert.equal(result.ok, false, 'a dropped medication must not pass')
-  assert.ok(result.problems.some(p => /amoxicillin/i.test(p.statement)))
-})
-
-test('verifier blocks a rewrite that changed a dose', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  const rendered = render(extraction)
-  const tampered = rendered.text.replace(/500 mg/g, '250 mg')
-  const result = verify(extraction, tampered)
-  assert.equal(result.ok, false, 'a changed dose must not pass')
-})
-
-test('normalise joins digits and units', () => {
-  assert.equal(normalise('500mg'), normalise('500 mg'))
-})
-
-test('unparsed instruction with no anchors must be carried verbatim', () => {
-  const extraction = extract('Rest when you feel tired.')
-  assert.equal(extraction.unparsed.length, 1)
-  assert.equal(extraction.unparsed[0].verbatimRequired, true)
-  const rendered = render(extraction)
-  assert.match(rendered.text, /Rest when you feel tired/i)
-  assert.equal(verify(extraction, rendered.text).ok, true)
-})
-
-test('glossary phrases do not double a leading article', () => {
-  for (const letter of SAMPLES) {
-    const rendered = render(extract(letter.text, { baseDate: '2026-11-20' }))
-    assert.doesNotMatch(rendered.text, /\b(the|a|an)\s+\1\b/i, `${letter.id} doubled an article`)
-  }
-})
-
-test('short brand names are expanded, not left as shorthand', () => {
-  const rendered = render(extract(sample('messy').text, { baseDate: '2026-11-20' }))
-  assert.doesNotMatch(rendered.text, /\bAmox\b/)
-  assert.match(rendered.text, /amoxicillin/i)
-})
-
-test('diet lines land in the activity section, not the leftovers', () => {
-  const extraction = extract(sample('messy').text, { baseDate: '2026-11-20' })
-  assert.ok(
-    extraction.restrictions.some(item => /diet as tolerated/i.test(item.raw)),
-    'diet instruction classified as a restriction'
-  )
-  const rendered = render(extraction)
-  assert.match(rendered.text, /drink as much water/i)
-  assert.doesNotMatch(rendered.text, /H2O/)
-})
-
-test('department headings are not treated as instructions', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  assert.ok(
-    !extraction.all.some(item => /^general surgery$/i.test(item.raw.trim())),
-    'heading survived as an instruction'
-  )
-})
-
-test('a doctor name is not split into a stray instruction', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  assert.ok(
-    !extraction.all.some(item => /^chen\.?$/i.test(item.raw.trim())),
-    'Chen became its own instruction'
-  )
-  assert.equal(extraction.unparsed.length, 0, 'nothing left over in the clean letter')
-  assert.match(extraction.appointments[0].raw, /Dr\. Chen/)
-})
-
-test('calendar export is well formed', () => {
-  const extraction = extract(sample('clean').text, { baseDate: '2026-11-20' })
-  const ics = buildIcs(extraction, { startDate: '2026-11-20' })
-  assert.match(ics, /^BEGIN:VCALENDAR/)
-  assert.match(ics, /END:VCALENDAR\r\n$/)
-  assert.match(ics, /DTSTART;VALUE=DATE:20261202/)
-  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, (ics.match(/END:VEVENT/g) || []).length)
-  assert.match(ics, /RRULE:FREQ=DAILY;COUNT=7/)
-})
-
-test('empty input is handled without throwing', () => {
-  const extraction = extract('')
-  assert.equal(extraction.all.length, 0)
-  const rendered = render(extraction)
-  assert.equal(rendered.text, '')
-  assert.equal(verify(extraction, '').ok, true)
-  assert.match(buildIcs(extraction), /BEGIN:VCALENDAR/)
-})
-
-console.log(`${passed} passed, ${failures.length} failed`)
-for (const failure of failures) {
-  console.error(`\nFAIL: ${failure.name}\n  ${failure.message}`)
+function assert (condition, message) {
+  if (!condition) throw new Error(message || 'assertion failed')
 }
-process.exit(failures.length ? 1 : 0)
+
+function equal (actual, expected, message) {
+  if (actual !== expected) {
+    throw new Error(`${message || 'mismatch'}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
+  }
+}
+
+function ids (text) {
+  return scan(text).map(hit => hit.ruleId)
+}
+
+const FIXTURE = [
+  'Fern & Fold Bamboo Bottle',
+  '£28 · 750 ml',
+  'Our eco-friendly bottle is carbon neutral and packaged in biodegradable wrap.',
+  'Every order is eco-certified by our own sustainability team, so you can go green without thinking about it.',
+  'We are proud to be net zero by 2040.',
+  'Pairs well with green tea and green beans.',
+].join(' ')
+
+test('a generic claim is caught', () => {
+  equal(ids('Our eco-friendly bottle holds 750 ml.').join(), 'generic')
+})
+
+test('the word green attached to a product is caught', () => {
+  assert(ids('Choose our green bottle instead.').includes('green'), 'green bottle not flagged')
+})
+
+test('green tea and green beans are left alone', () => {
+  equal(scan('Pairs well with green tea and green beans.').length, 0)
+})
+
+test('going green is caught', () => {
+  assert(ids('So you can go green without thinking.').includes('green'), 'go green not flagged')
+})
+
+test('a neutrality claim resting on offsets is caught', () => {
+  equal(ids('This carton is carbon neutral.').join(), 'offset')
+})
+
+test('a dated promise outranks the plain neutrality match', () => {
+  const hits = scan('We will be carbon neutral by 2030.')
+  equal(hits.length, 1, 'one finding')
+  equal(hits[0].ruleId, 'future')
+  equal(hits[0].span.toLowerCase(), 'carbon neutral by 2030')
+})
+
+test('an invented certification is caught', () => {
+  assert(ids('Every order is eco-certified by our own team.').includes('label'), 'label not flagged')
+})
+
+test('the full demo page produces four banned and two evidence findings', () => {
+  const summary = summarise(scan(FIXTURE))
+  equal(summary.banned, 4)
+  equal(summary.needsEvidence, 2)
+  equal(summary.total, 6)
+})
+
+test('a compliant page produces no findings', () => {
+  const text = 'Body is 100% recycled aluminium. Licensed under the EU Ecolabel, licence DK/001. Spare parts sold for ten years.'
+  equal(scan(text).length, 0, 'clean copy flagged')
+})
+
+test('every finding reads back to a real rule', () => {
+  for (const hit of scan(FIXTURE)) {
+    assert(ruleById(hit.ruleId), `unknown rule id ${hit.ruleId}`)
+    assert(hit.context.length > hit.span.length, 'context missing')
+  }
+})
+
+test('findings come back in reading order', () => {
+  const hits = scan(FIXTURE)
+  for (let i = 1; i < hits.length; i += 1) {
+    assert(hits[i].start > hits[i - 1].start, 'findings out of order')
+  }
+})
+
+test('every rule can cite itself and say what would satisfy it', () => {
+  for (const rule of RULES) {
+    assert(rule.citation, `${rule.id} has no citation`)
+    assert(rule.evidence, `${rule.id} has no evidence line`)
+    assert(rule.says, `${rule.id} has no plain explanation`)
+    assert(rule.pattern.global, `${rule.id} pattern must be global`)
+    assert(rule.severity === 'banned' || rule.severity === 'needs-evidence', `${rule.id} has a bad severity`)
+  }
+})
+
+test('the verdict line stays honest about a clean page', () => {
+  equal(verdictLine(summarise([])), 'No banned or unsubstantiated environmental claims were found on this page.')
+})
+
+test('the verdict line counts both severities', () => {
+  const line = verdictLine(summarise(scan(FIXTURE)))
+  assert(line.startsWith('4 banned claims and 2 needing evidence'), line)
+})
+
+console.log(`\n${passed} passed, ${failed} failed`)
+process.exit(failed === 0 ? 0 : 1)

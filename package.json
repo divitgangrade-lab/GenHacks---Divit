@@ -1,12 +1,26 @@
 {
-  "name": "discharge-rx",
-  "version": "1.0.0",
+  "name": "claim-check",
+  "version": "0.2.0",
   "private": true,
-  "description": "Turns a hospital discharge letter into a plain-language plan, and proves no instruction was lost.",
   "type": "module",
+  "description": "Marks banned environmental claims on the page you are shopping on.",
   "scripts": {
     "test": "node tests/run.mjs",
-    "serve": "python3 -m http.server 4173"
+    "serve": "python3 -m http.server 3000 --bind 0.0.0.0",
+    "rb": "node scripts/rb-fetch.mjs",
+    "build:showroom": "vite build"
   },
-  "license": "MIT"
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@use-gesture/react": "^10.2.27",
+    "gsap": "^3.13.0",
+    "motion": "^12.23.12",
+    "ogl": "^1.0.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.0.0"
+  }
 }

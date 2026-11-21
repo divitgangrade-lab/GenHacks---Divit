@@ -1,0 +1,151 @@
+:root {
+  --ink: #f4f1ea;
+  --ink-soft: #a9a396;
+  --dusk: #0c0b0f;
+  --card: #14121a;
+  --edge: #262231;
+  --accent: #7df9ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--dusk);
+  color: var(--ink);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; }
+
+.kicker {
+  font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-soft); margin: 0 0 .6rem;
+}
+
+h1 {
+  font: 600 clamp(2rem, 5vw, 3rem)/1.1 "Iowan Old Style", Palatino, Georgia, serif;
+  margin: 0;
+}
+
+.lede { color: var(--ink-soft); max-width: 60ch; margin: 1rem 0 0; font-size: .98rem; }
+
+.back { font-size: .9rem; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+.section { margin-top: 3.5rem; }
+
+.section__head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  border-bottom: 1px solid var(--edge); padding-bottom: .6rem; margin-bottom: 1.2rem;
+}
+
+.section__head h2 {
+  font: 600 1.1rem/1.2 "Iowan Old Style", Palatino, Georgia, serif; margin: 0;
+}
+
+.section__head span { font-size: .8rem; color: var(--ink-soft); }
+
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+.tile {
+  position: relative;
+  min-height: 170px;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile--tall { grid-row: span 2; min-height: 360px; }
+
+.tile--canvas { min-height: 220px; }
+
+.tile__stage {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  padding: .6rem;
+}
+
+.tile__stage > * { max-width: 100%; }
+
+.tile__name {
+  position: absolute; left: .6rem; bottom: .45rem;
+  font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-soft); background: rgba(12, 11, 15, .72);
+  padding: .1rem .35rem; border-radius: 3px; pointer-events: none;
+  z-index: 5;
+}
+
+.tile__idle {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--edge); font-size: 1.4rem;
+}
+
+/* cursors: mounted one at a time, never all at once */
+
+.cursor-bar {
+  display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem;
+}
+
+.cursor-bar button {
+  font: inherit; font-size: .85rem; padding: .45rem .85rem;
+  background: transparent; color: var(--ink-soft);
+  border: 1px solid var(--edge); border-radius: 999px; cursor: pointer;
+}
+
+.cursor-bar button[aria-pressed="true"] { color: var(--dusk); background: var(--accent); border-color: var(--accent); }
+
+.cursor-hint { color: var(--ink-soft); font-size: .85rem; margin: 0 0 1.4rem; }
+
+.foot { margin-top: 4rem; border-top: 1px solid var(--edge); padding-top: 1.2rem; color: var(--ink-soft); font-size: .85rem; }
+
+/* small props handed to the components */
+
+.demo { color: var(--ink); font-size: .9rem; margin: 0; }
+.big { font: 600 2rem/1 "Iowan Old Style", Palatino, Georgia, serif; }
+
+.demo--button {
+  font: inherit; font-size: .85rem; padding: .55rem 1rem;
+  background: transparent; color: var(--ink);
+  border: 1px solid var(--edge); border-radius: 6px; cursor: pointer;
+}
+.demo--button:hover { border-color: var(--accent); color: var(--accent); }
+
+.demo--box {
+  padding: 1.1rem 1.5rem; border: 1px solid var(--edge); border-radius: 8px;
+  font-size: .85rem; color: var(--ink-soft);
+}
+
+.demo--chip {
+  display: inline-block; padding: .5rem 1rem;
+  border: 1px solid var(--edge); border-radius: 999px; font-size: .85rem;
+}
+
+.demo--sheet {
+  width: 100%; height: 100%; display: grid; place-items: center;
+  background: #1c1a24; border: 1px solid var(--edge); border-radius: 6px;
+  color: var(--ink); font-size: .85rem;
+}
+
+.demo--blur { width: 100%; height: 100%; display: grid; place-items: center; }
+
+.tile__fail { color: #e76f51; font-size: .76rem; text-align: center; padding: 0 1rem; }
+
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+  .tile--tall { grid-row: span 1; min-height: 260px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile__stage { filter: none; }
+}
